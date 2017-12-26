@@ -3,6 +3,7 @@ html, body {
     margin: 0;
     width: 100%;
     height: 100%;
+    font-family: Arial, serif;
 }
 
 * {
@@ -11,16 +12,65 @@ html, body {
 
 #container {
     margin: 50px auto;
+    padding: 0;
     width: 1000px;
-    height: 600px;
-    background: #3C3F41;
-    border-radius: 10px;
+    background: #252525;
     overflow: hidden;
+    border-radius: 4px;
 }
 
 #editor {
-    margin: 5px;
-    width: calc(100% - 10px);
-    height: calc(100% - 10px);
-    border-radius: 10px;
+    margin: 0;
+    height: 600px;
+    z-index: 0;
+    clear: both;
+}
+
+#tabs {
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 1px 8px 0 rgba(0,0,0,0.7);
+    font-size: 0;
+}
+
+.tab {
+    display: inline-block;
+    margin: 0;
+    padding: 8px 10px 5px;
+    border-bottom: 1px solid #393939;
+    font-size: 15px;
+    background: #2d2d2d;
+}
+
+.tab.active {
+    border-bottom: none;
+    background: #1e1e1e;
+}
+
+.tab.active .tab-close {
+    display: initial;
+}
+
+.tab.active:not(:first-of-type) {
+    border-left: 1px solid #393939;
+}
+
+.tab.active:not(:last-of-type) {
+    border-right: 1px solid #393939;
+}
+
+.tab.active .tab-title {
+    color: #e8e8e8;
+}
+
+.tab-title {
+    color: #888888;
+    pointer-events: none;
+}
+
+.tab-close {
+    display: none;
+    text-decoration: none;
+    color: #e8e8e8;
+    margin-left: 3px;
 }

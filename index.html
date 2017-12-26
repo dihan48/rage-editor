@@ -4,12 +4,31 @@
         <meta charset="UTF-8">
         <title>RAGE:MP Debugger</title>
         <link rel="stylesheet" href="index.css"/>
+        <script type="text/javascript" src="jquery.min.js"></script>
+        <script type="text/javascript" src="ace/ace.js"></script>
     </head>
     <body>
         <div id="container">
+            <div id="tabs">
+                <div class="tab">
+                    <span class="tab-title">New 1</span>
+                    <a href="#" class="tab-close">&times;</a>
+                </div>
+                <div class="tab active">
+                    <span class="tab-title">New 2</span>
+                    <a href="#" class="tab-close">&times;</a>
+                </div>
+                <div class="tab">
+                    <span class="tab-title">New 3</span>
+                    <a href="#" class="tab-close">&times;</a>
+                </div>
+                <div class="tab">
+                    <span class="tab-title">New 4</span>
+                    <a href="#" class="tab-close">&times;</a>
+                </div>
+            </div>
             <pre id="editor"></pre>
         </div>
-        <script type="text/javascript" src="ace/ace.js"></script>
         <script type="text/javascript" src="index.js"></script>
     </body>
 </html>
