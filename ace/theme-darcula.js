@@ -73,7 +73,7 @@ color:#CC7832;\
 color:#CC7832;\
 }\
 .ace-darcula .ace_constant.ace_language {\
-color:#FDC251;\
+color:#CC7832;\
 }\
 .ace-darcula .ace_constant.ace_library {\
 color:#8DFF0A;\
