@@ -1,5 +1,5 @@
 "no use strict";
-!(function(window) {
+;(function(window) {
 if (typeof window.window != "undefined" && window.document)
     return;
 if (window.require && window.define)
@@ -217,7 +217,7 @@ window.onmessage = function(e) {
 };
 })(this);
 
-define("ace/lib/oop",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/lib/oop",["require","exports","module"], function(require, exports, module) {
 "use strict";
 
 exports.inherits = function(ctor, superCtor) {
@@ -245,7 +245,7 @@ exports.implement = function(proto, mixin) {
 
 });
 
-define("ace/range",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/range",["require","exports","module"], function(require, exports, module) {
 "use strict";
 var comparePoints = function(p1, p2) {
     return p1.row - p2.row || p1.column - p2.column;
@@ -450,9 +450,9 @@ var Range = function(startRow, startColumn, endRow, endColumn) {
     };
     this.collapseRows = function() {
         if (this.end.column == 0)
-            return new Range(this.start.row, 0, Math.max(this.start.row, this.end.row-1), 0);
+            return new Range(this.start.row, 0, Math.max(this.start.row, this.end.row-1), 0)
         else
-            return new Range(this.start.row, 0, this.end.row, 0);
+            return new Range(this.start.row, 0, this.end.row, 0)
     };
     this.toScreenRange = function(session) {
         var screenPosStart = session.documentToScreenPosition(this.start);
@@ -484,7 +484,7 @@ Range.comparePoints = function(p1, p2) {
 exports.Range = Range;
 });
 
-define("ace/apply_delta",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/apply_delta",["require","exports","module"], function(require, exports, module) {
 "use strict";
 
 function throwDeltaError(delta, errorText){
@@ -546,10 +546,10 @@ exports.applyDelta = function(docLines, delta, doNotValidate) {
             }
             break;
     }
-};
+}
 });
 
-define("ace/lib/event_emitter",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/lib/event_emitter",["require","exports","module"], function(require, exports, module) {
 "use strict";
 
 var EventEmitter = {};
@@ -607,7 +607,7 @@ EventEmitter.once = function(eventName, callback) {
 
 
 EventEmitter.setDefaultHandler = function(eventName, callback) {
-    var handlers = this._defaultHandlers;
+    var handlers = this._defaultHandlers
     if (!handlers)
         handlers = this._defaultHandlers = {_disabled_: {}};
     
@@ -624,7 +624,7 @@ EventEmitter.setDefaultHandler = function(eventName, callback) {
     handlers[eventName] = callback;
 };
 EventEmitter.removeDefaultHandler = function(eventName, callback) {
-    var handlers = this._defaultHandlers;
+    var handlers = this._defaultHandlers
     if (!handlers)
         return;
     var disabled = handlers._disabled_[eventName];
@@ -675,7 +675,7 @@ exports.EventEmitter = EventEmitter;
 
 });
 
-define("ace/anchor",["require","exports","module","ace/lib/oop","ace/lib/event_emitter"], function(require, exports, module) {
+ace.define("ace/anchor",["require","exports","module","ace/lib/oop","ace/lib/event_emitter"], function(require, exports, module) {
 "use strict";
 
 var oop = require("./lib/oop");
@@ -800,7 +800,7 @@ var Anchor = exports.Anchor = function(doc, row, column) {
 
 });
 
-define("ace/document",["require","exports","module","ace/lib/oop","ace/apply_delta","ace/lib/event_emitter","ace/range","ace/anchor"], function(require, exports, module) {
+ace.define("ace/document",["require","exports","module","ace/lib/oop","ace/apply_delta","ace/lib/event_emitter","ace/range","ace/anchor"], function(require, exports, module) {
 "use strict";
 
 var oop = require("./lib/oop");
@@ -1156,7 +1156,7 @@ var Document = function(textOrLines) {
 exports.Document = Document;
 });
 
-define("ace/lib/lang",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/lib/lang",["require","exports","module"], function(require, exports, module) {
 "use strict";
 
 exports.last = function(a) {
@@ -1344,7 +1344,7 @@ exports.delayedCall = function(fcn, defaultTimeout) {
 };
 });
 
-define("ace/worker/mirror",["require","exports","module","ace/range","ace/document","ace/lib/lang"], function(require, exports, module) {
+ace.define("ace/worker/mirror",["require","exports","module","ace/range","ace/document","ace/lib/lang"], function(require, exports, module) {
 "use strict";
 
 var Range = require("../range").Range;
@@ -1406,7 +1406,7 @@ var Mirror = exports.Mirror = function(sender) {
 
 });
 
-define("ace/mode/javascript/jshint",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/mode/javascript/jshint",["require","exports","module"], function(require, exports, module) {
 module.exports = (function outer (modules, cache, entry) {
     var previousRequire = typeof require == "function" && require;
     function newRequire(name, jumped){
@@ -11683,7 +11683,7 @@ exports.jasmine = {
 
 });
 
-define("ace/mode/javascript_worker",["require","exports","module","ace/lib/oop","ace/worker/mirror","ace/mode/javascript/jshint"], function(require, exports, module) {
+ace.define("ace/mode/javascript_worker",["require","exports","module","ace/lib/oop","ace/worker/mirror","ace/mode/javascript/jshint"], function(require, exports, module) {
 "use strict";
 
 var oop = require("../lib/oop");
@@ -11762,7 +11762,7 @@ oop.inherits(JavaScriptWorker, Mirror);
             if (e === 0)
                 return true;
         }
-        return false;
+        return false
     };
 
     this.onUpdate = function() {
@@ -11776,7 +11776,7 @@ oop.inherits(JavaScriptWorker, Mirror);
         lint(value, this.options, this.options.globals);
         var results = lint.errors;
 
-        var errorAdded = false;
+        var errorAdded = false
         for (var i = 0; i < results.length; i++) {
             var error = results[i];
             if (!error)
@@ -11798,7 +11798,7 @@ oop.inherits(JavaScriptWorker, Mirror);
                 continue;
             }
             else if (infoRe.test(raw)) {
-                type = "info";
+                type = "info"
             }
             else if (errorsRe.test(raw)) {
                 errorAdded  = true;
@@ -11830,7 +11830,7 @@ oop.inherits(JavaScriptWorker, Mirror);
 
 });
 
-define("ace/lib/es5-shim",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/lib/es5-shim",["require","exports","module"], function(require, exports, module) {
 
 function Empty() {}
 

@@ -1,4 +1,4 @@
-define("ace/ext/menu_tools/element_generator",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/ext/menu_tools/element_generator",["require","exports","module"], function(require, exports, module) {
 'use strict';
 module.exports.createOption = function createOption (obj) {
     var attribute;
@@ -54,7 +54,7 @@ module.exports.createSelection = function createSelection (id, values, clss) {
 
 });
 
-define("ace/ext/modelist",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/ext/modelist",["require","exports","module"], function(require, exports, module) {
 "use strict";
 
 var modes = [];
@@ -109,9 +109,6 @@ var supportedModes = {
     coffee:      ["coffee|cf|cson|^Cakefile"],
     ColdFusion:  ["cfm"],
     CSharp:      ["cs"],
-    Csound_Document: ["csd"],
-    Csound_Orchestra: ["orc"],
-    Csound_Score: ["sco"],
     CSS:         ["css"],
     Curly:       ["curly"],
     D:           ["d|di"],
@@ -136,7 +133,6 @@ var supportedModes = {
     Glsl:        ["glsl|frag|vert"],
     Gobstones:   ["gbs"],
     golang:      ["go"],
-    GraphQLSchema: ["gql"],
     Groovy:      ["groovy"],
     HAML:        ["haml"],
     Handlebars:  ["hbs|handlebars|tpl|mustache"],
@@ -144,7 +140,7 @@ var supportedModes = {
     Haskell_Cabal:     ["cabal"],
     haXe:        ["hx"],
     Hjson:       ["hjson"],
-    HTML:        ["html|htm|xhtml|vue|we|wpy"],
+    HTML:        ["html|htm|xhtml"],
     HTML_Elixir: ["eex|html.eex"],
     HTML_Ruby:   ["erb|rhtml|html.erb"],
     INI:         ["ini|conf|cfg|prefs"],
@@ -156,7 +152,6 @@ var supportedModes = {
     JSON:        ["json"],
     JSONiq:      ["jq"],
     JSP:         ["jsp"],
-    JSSM:        ["jssm|jssm_state"],
     JSX:         ["jsx"],
     Julia:       ["jl"],
     Kotlin:      ["kt|kts"],
@@ -186,7 +181,6 @@ var supportedModes = {
     Perl:        ["pl|pm"],
     pgSQL:       ["pgsql"],
     PHP:         ["php|phtml|shtml|php3|php4|php5|phps|phpt|aw|ctp|module"],
-    Pig:         ["pig"],
     Powershell:  ["ps1"],
     Praat:       ["praat|praatscript|psc|proc"],
     Prolog:      ["plg|prolog"],
@@ -196,7 +190,6 @@ var supportedModes = {
     R:           ["r"],
     Razor:       ["cshtml|asp"],
     RDoc:        ["Rd"],
-    Red:         ["red|reds"],
     RHTML:       ["Rhtml"],
     RST:         ["rst"],
     Ruby:        ["rb|ru|gemspec|rake|^Guardfile|^Rakefile|^Gemfile"],
@@ -242,9 +235,6 @@ var nameOverrides = {
     CSharp: "C#",
     golang: "Go",
     C_Cpp: "C and C++",
-    Csound_Document: "Csound Document",
-    Csound_Orchestra: "Csound",
-    Csound_Score: "Csound Score",
     coffee: "CoffeeScript",
     HTML_Ruby: "HTML (Ruby)",
     HTML_Elixir: "HTML (Elixir)",
@@ -268,7 +258,7 @@ module.exports = {
 
 });
 
-define("ace/ext/themelist",["require","exports","module","ace/lib/fixoldbrowsers"], function(require, exports, module) {
+ace.define("ace/ext/themelist",["require","exports","module","ace/lib/fixoldbrowsers"], function(require, exports, module) {
 "use strict";
 require("ace/lib/fixoldbrowsers");
 
@@ -293,7 +283,6 @@ var themeData = [
     ["Clouds Midnight"      ,"clouds_midnight"         ,  "dark"],
     ["Cobalt"               ,"cobalt"                  ,  "dark"],
     ["Gruvbox"              ,"gruvbox"                 ,  "dark"],
-    ["Green on Black"       ,"gob"                     ,  "dark"],
     ["idle Fingers"         ,"idle_fingers"            ,  "dark"],
     ["krTheme"              ,"kr_theme"                ,  "dark"],
     ["Merbivore"            ,"merbivore"               ,  "dark"],
@@ -327,7 +316,7 @@ exports.themes = themeData.map(function(data) {
 
 });
 
-define("ace/ext/menu_tools/add_editor_menu_options",["require","exports","module","ace/ext/modelist","ace/ext/themelist"], function(require, exports, module) {
+ace.define("ace/ext/menu_tools/add_editor_menu_options",["require","exports","module","ace/ext/modelist","ace/ext/themelist"], function(require, exports, module) {
 'use strict';
 module.exports.addEditorMenuOptions = function addEditorMenuOptions (editor) {
     var modelist = require('../modelist');
@@ -381,7 +370,7 @@ module.exports.addEditorMenuOptions = function addEditorMenuOptions (editor) {
 
 });
 
-define("ace/ext/menu_tools/get_set_functions",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/ext/menu_tools/get_set_functions",["require","exports","module"], function(require, exports, module) {
 'use strict';
 module.exports.getSetFunctions = function getSetFunctions (editor) {
     var out = [];
@@ -423,7 +412,213 @@ module.exports.getSetFunctions = function getSetFunctions (editor) {
 
 });
 
-define("ace/ext/menu_tools/generate_settings_menu",["require","exports","module","ace/ext/menu_tools/element_generator","ace/ext/menu_tools/add_editor_menu_options","ace/ext/menu_tools/get_set_functions","ace/ace"], function(require, exports, module) {
+ace.define("ace/theme/textmate",["require","exports","module","ace/lib/dom"], function(require, exports, module) {
+"use strict";
+
+exports.isDark = false;
+exports.cssClass = "ace-tm";
+exports.cssText = ".ace-tm .ace_gutter {\
+background: #f0f0f0;\
+color: #333;\
+}\
+.ace-tm .ace_print-margin {\
+width: 1px;\
+background: #e8e8e8;\
+}\
+.ace-tm .ace_fold {\
+background-color: #6B72E6;\
+}\
+.ace-tm {\
+background-color: #FFFFFF;\
+color: black;\
+}\
+.ace-tm .ace_cursor {\
+color: black;\
+}\
+.ace-tm .ace_invisible {\
+color: rgb(191, 191, 191);\
+}\
+.ace-tm .ace_storage,\
+.ace-tm .ace_keyword {\
+color: blue;\
+}\
+.ace-tm .ace_constant {\
+color: rgb(197, 6, 11);\
+}\
+.ace-tm .ace_constant.ace_buildin {\
+color: rgb(88, 72, 246);\
+}\
+.ace-tm .ace_constant.ace_language {\
+color: rgb(88, 92, 246);\
+}\
+.ace-tm .ace_constant.ace_library {\
+color: rgb(6, 150, 14);\
+}\
+.ace-tm .ace_invalid {\
+background-color: rgba(255, 0, 0, 0.1);\
+color: red;\
+}\
+.ace-tm .ace_support.ace_function {\
+color: rgb(60, 76, 114);\
+}\
+.ace-tm .ace_support.ace_constant {\
+color: rgb(6, 150, 14);\
+}\
+.ace-tm .ace_support.ace_type,\
+.ace-tm .ace_support.ace_class {\
+color: rgb(109, 121, 222);\
+}\
+.ace-tm .ace_keyword.ace_operator {\
+color: rgb(104, 118, 135);\
+}\
+.ace-tm .ace_string {\
+color: rgb(3, 106, 7);\
+}\
+.ace-tm .ace_comment {\
+color: rgb(76, 136, 107);\
+}\
+.ace-tm .ace_comment.ace_doc {\
+color: rgb(0, 102, 255);\
+}\
+.ace-tm .ace_comment.ace_doc.ace_tag {\
+color: rgb(128, 159, 191);\
+}\
+.ace-tm .ace_constant.ace_numeric {\
+color: rgb(0, 0, 205);\
+}\
+.ace-tm .ace_variable {\
+color: rgb(49, 132, 149);\
+}\
+.ace-tm .ace_xml-pe {\
+color: rgb(104, 104, 91);\
+}\
+.ace-tm .ace_entity.ace_name.ace_function {\
+color: #0000A2;\
+}\
+.ace-tm .ace_heading {\
+color: rgb(12, 7, 255);\
+}\
+.ace-tm .ace_list {\
+color:rgb(185, 6, 144);\
+}\
+.ace-tm .ace_meta.ace_tag {\
+color:rgb(0, 22, 142);\
+}\
+.ace-tm .ace_string.ace_regex {\
+color: rgb(255, 0, 0)\
+}\
+.ace-tm .ace_marker-layer .ace_selection {\
+background: rgb(181, 213, 255);\
+}\
+.ace-tm.ace_multiselect .ace_selection.ace_start {\
+box-shadow: 0 0 3px 0px white;\
+}\
+.ace-tm .ace_marker-layer .ace_step {\
+background: rgb(252, 255, 0);\
+}\
+.ace-tm .ace_marker-layer .ace_stack {\
+background: rgb(164, 229, 101);\
+}\
+.ace-tm .ace_marker-layer .ace_bracket {\
+margin: -1px 0 0 -1px;\
+border: 1px solid rgb(192, 192, 192);\
+}\
+.ace-tm .ace_marker-layer .ace_active-line {\
+background: rgba(0, 0, 0, 0.07);\
+}\
+.ace-tm .ace_gutter-active-line {\
+background-color : #dcdcdc;\
+}\
+.ace-tm .ace_marker-layer .ace_selected-word {\
+background: rgb(250, 250, 255);\
+border: 1px solid rgb(200, 200, 250);\
+}\
+.ace-tm .ace_indent-guide {\
+background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAE0lEQVQImWP4////f4bLly//BwAmVgd1/w11/gAAAABJRU5ErkJggg==\") right repeat-y;\
+}\
+";
+
+var dom = require("../lib/dom");
+dom.importCssString(exports.cssText, exports.cssClass);
+});
+
+ace.define("ace/ace",["require","exports","module","ace/lib/fixoldbrowsers","ace/lib/dom","ace/lib/event","ace/editor","ace/edit_session","ace/undomanager","ace/virtual_renderer","ace/worker/worker_client","ace/keyboard/hash_handler","ace/placeholder","ace/multi_select","ace/mode/folding/fold_mode","ace/theme/textmate","ace/ext/error_marker","ace/config"], function(require, exports, module) {
+"use strict";
+
+require("./lib/fixoldbrowsers");
+
+var dom = require("./lib/dom");
+var event = require("./lib/event");
+
+var Editor = require("./editor").Editor;
+var EditSession = require("./edit_session").EditSession;
+var UndoManager = require("./undomanager").UndoManager;
+var Renderer = require("./virtual_renderer").VirtualRenderer;
+require("./worker/worker_client");
+require("./keyboard/hash_handler");
+require("./placeholder");
+require("./multi_select");
+require("./mode/folding/fold_mode");
+require("./theme/textmate");
+require("./ext/error_marker");
+
+exports.config = require("./config");
+exports.require = require;
+
+if (typeof define === "function")
+    exports.define = define;
+exports.edit = function(el) {
+    if (typeof el == "string") {
+        var _id = el;
+        el = document.getElementById(_id);
+        if (!el)
+            throw new Error("ace.edit can't find div #" + _id);
+    }
+
+    if (el && el.env && el.env.editor instanceof Editor)
+        return el.env.editor;
+
+    var value = "";
+    if (el && /input|textarea/i.test(el.tagName)) {
+        var oldNode = el;
+        value = oldNode.value;
+        el = dom.createElement("pre");
+        oldNode.parentNode.replaceChild(el, oldNode);
+    } else if (el) {
+        value = dom.getInnerText(el);
+        el.innerHTML = "";
+    }
+
+    var doc = exports.createEditSession(value);
+
+    var editor = new Editor(new Renderer(el));
+    editor.setSession(doc);
+
+    var env = {
+        document: doc,
+        editor: editor,
+        onResize: editor.resize.bind(editor, null)
+    };
+    if (oldNode) env.textarea = oldNode;
+    event.addListener(window, "resize", env.onResize);
+    editor.on("destroy", function() {
+        event.removeListener(window, "resize", env.onResize);
+        env.editor.container.env = null; // prevent memory leak on old ie
+    });
+    editor.container.env = editor.env = env;
+    return editor;
+};
+exports.createEditSession = function(text, mode) {
+    var doc = new EditSession(text, mode);
+    doc.setUndoManager(new UndoManager());
+    return doc;
+}
+exports.EditSession = EditSession;
+exports.UndoManager = UndoManager;
+exports.version = "1.2.6";
+});
+
+ace.define("ace/ext/menu_tools/generate_settings_menu",["require","exports","module","ace/ext/menu_tools/element_generator","ace/ext/menu_tools/add_editor_menu_options","ace/ext/menu_tools/get_set_functions","ace/ace"], function(require, exports, module) {
 'use strict';
 var egen = require('./element_generator');
 var addEditorMenuOptions = require('./add_editor_menu_options').addEditorMenuOptions;
@@ -548,7 +743,7 @@ module.exports.generateSettingsMenu = function generateSettingsMenu (editor) {
 
 });
 
-define("ace/ext/menu_tools/overlay_page",["require","exports","module","ace/lib/dom"], function(require, exports, module) {
+ace.define("ace/ext/menu_tools/overlay_page",["require","exports","module","ace/lib/dom"], function(require, exports, module) {
 'use strict';
 var dom = require("../../lib/dom");
 var cssText = "#ace_settingsmenu, #kbshortcutmenu {\
@@ -649,7 +844,7 @@ module.exports.overlayPage = function overlayPage(editor, contentElement, top, r
 
 });
 
-define("ace/ext/settings_menu",["require","exports","module","ace/ext/menu_tools/generate_settings_menu","ace/ext/menu_tools/overlay_page","ace/editor"], function(require, exports, module) {
+ace.define("ace/ext/settings_menu",["require","exports","module","ace/ext/menu_tools/generate_settings_menu","ace/ext/menu_tools/overlay_page","ace/editor"], function(require, exports, module) {
 "use strict";
 var generateSettingsMenu = require('./menu_tools/generate_settings_menu').generateSettingsMenu;
 var overlayPage = require('./menu_tools/overlay_page').overlayPage;
@@ -666,6 +861,6 @@ module.exports.init = function(editor) {
 };
 });
                 (function() {
-                    window.require(["ace/ext/settings_menu"], function() {});
+                    ace.require(["ace/ext/settings_menu"], function() {});
                 })();
             

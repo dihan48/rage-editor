@@ -1,4 +1,4 @@
-define("ace/snippets",["require","exports","module","ace/lib/oop","ace/lib/event_emitter","ace/lib/lang","ace/range","ace/anchor","ace/keyboard/hash_handler","ace/tokenizer","ace/lib/dom","ace/editor"], function(require, exports, module) {
+ace.define("ace/snippets",["require","exports","module","ace/lib/oop","ace/lib/event_emitter","ace/lib/lang","ace/range","ace/anchor","ace/keyboard/hash_handler","ace/tokenizer","ace/lib/dom","ace/editor"], function(require, exports, module) {
 "use strict";
 var oop = require("./lib/oop");
 var EventEmitter = require("./lib/event_emitter").EventEmitter;
@@ -272,14 +272,14 @@ var SnippetManager = function() {
                 return;
 
             var value = tokens.slice(i + 1, i1);
-            var isNested = value.some(function(t) {return typeof t === "object";});          
+            var isNested = value.some(function(t) {return typeof t === "object"});          
             if (isNested && !ts.value) {
                 ts.value = value;
             } else if (value.length && (!ts.value || typeof ts.value !== "string")) {
                 ts.value = value.join("");
             }
         });
-        tabstops.forEach(function(ts) {ts.length = 0;});
+        tabstops.forEach(function(ts) {ts.length = 0});
         var expanding = {};
         function copyValue(val) {
             var copy = [];
@@ -906,7 +906,7 @@ var Editor = require("./editor").Editor;
 
 });
 
-define("ace/ext/emmet",["require","exports","module","ace/keyboard/hash_handler","ace/editor","ace/snippets","ace/range","resources","resources","tabStops","resources","utils","actions","ace/config","ace/config"], function(require, exports, module) {
+ace.define("ace/ext/emmet",["require","exports","module","ace/keyboard/hash_handler","ace/editor","ace/snippets","ace/range","resources","resources","tabStops","resources","utils","actions","ace/config","ace/config"], function(require, exports, module) {
 "use strict";
 var HashHandler = require("ace/keyboard/hash_handler").HashHandler;
 var Editor = require("ace/editor").Editor;
@@ -1176,7 +1176,7 @@ exports.isAvailable = function(editor, command) {
         } catch(e) {}
     }
     return isSupported;
-};
+}
 
 var onChangeMode = function(e, target) {
     var editor = target;
@@ -1218,6 +1218,6 @@ exports.setCore = function(e) {
 };
 });
                 (function() {
-                    window.require(["ace/ext/emmet"], function() {});
+                    ace.require(["ace/ext/emmet"], function() {});
                 })();
             

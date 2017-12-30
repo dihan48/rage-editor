@@ -1,4 +1,4 @@
-define("ace/ext/modelist",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/ext/modelist",["require","exports","module"], function(require, exports, module) {
 "use strict";
 
 var modes = [];
@@ -53,9 +53,6 @@ var supportedModes = {
     coffee:      ["coffee|cf|cson|^Cakefile"],
     ColdFusion:  ["cfm"],
     CSharp:      ["cs"],
-    Csound_Document: ["csd"],
-    Csound_Orchestra: ["orc"],
-    Csound_Score: ["sco"],
     CSS:         ["css"],
     Curly:       ["curly"],
     D:           ["d|di"],
@@ -80,7 +77,6 @@ var supportedModes = {
     Glsl:        ["glsl|frag|vert"],
     Gobstones:   ["gbs"],
     golang:      ["go"],
-    GraphQLSchema: ["gql"],
     Groovy:      ["groovy"],
     HAML:        ["haml"],
     Handlebars:  ["hbs|handlebars|tpl|mustache"],
@@ -88,7 +84,7 @@ var supportedModes = {
     Haskell_Cabal:     ["cabal"],
     haXe:        ["hx"],
     Hjson:       ["hjson"],
-    HTML:        ["html|htm|xhtml|vue|we|wpy"],
+    HTML:        ["html|htm|xhtml"],
     HTML_Elixir: ["eex|html.eex"],
     HTML_Ruby:   ["erb|rhtml|html.erb"],
     INI:         ["ini|conf|cfg|prefs"],
@@ -100,7 +96,6 @@ var supportedModes = {
     JSON:        ["json"],
     JSONiq:      ["jq"],
     JSP:         ["jsp"],
-    JSSM:        ["jssm|jssm_state"],
     JSX:         ["jsx"],
     Julia:       ["jl"],
     Kotlin:      ["kt|kts"],
@@ -130,7 +125,6 @@ var supportedModes = {
     Perl:        ["pl|pm"],
     pgSQL:       ["pgsql"],
     PHP:         ["php|phtml|shtml|php3|php4|php5|phps|phpt|aw|ctp|module"],
-    Pig:         ["pig"],
     Powershell:  ["ps1"],
     Praat:       ["praat|praatscript|psc|proc"],
     Prolog:      ["plg|prolog"],
@@ -140,7 +134,6 @@ var supportedModes = {
     R:           ["r"],
     Razor:       ["cshtml|asp"],
     RDoc:        ["Rd"],
-    Red:         ["red|reds"],
     RHTML:       ["Rhtml"],
     RST:         ["rst"],
     Ruby:        ["rb|ru|gemspec|rake|^Guardfile|^Rakefile|^Gemfile"],
@@ -186,9 +179,6 @@ var nameOverrides = {
     CSharp: "C#",
     golang: "Go",
     C_Cpp: "C and C++",
-    Csound_Document: "Csound Document",
-    Csound_Orchestra: "Csound",
-    Csound_Score: "Csound Score",
     coffee: "CoffeeScript",
     HTML_Ruby: "HTML (Ruby)",
     HTML_Elixir: "HTML (Elixir)",
@@ -212,6 +202,6 @@ module.exports = {
 
 });
                 (function() {
-                    window.require(["ace/ext/modelist"], function() {});
+                    ace.require(["ace/ext/modelist"], function() {});
                 })();
             
