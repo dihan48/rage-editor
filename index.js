@@ -1,28 +1,69 @@
-const editor = ace.edit("editor");
-editor.setTheme("ace/theme/darcula");
-editor.setFontSize(18);
-editor.setShowPrintMargin(false);
-editor.getSession().setUseWorker(false);
-editor.getSession().setMode("ace/mode/javascript");
-editor.$blockScrolling = Infinity;
+const CONTEXT_SERVER = 0;
+const CONTEXT_CLIENT = 1;
 
-ace.config.loadModule('ace/ext/tern', () => {
-    editor.setOptions({
-        enableTern: {
-            defs: ['ecma5', 'ecma6', 'rageserver'],
-            plugins: {
-                doc_comment: {
-                    fullDocs: true
-                }
-            },
-            useWorker: false
-        },
-        enableSnippets: true,
-        enableBasicAutocompletion: true
+let editor;
+let ssDefDisp, csDefDisp, ssDefContent, csDefContent;
+
+async function loadServersideDefs(){
+    function load(data){
+        ssDefContent = data;
+        ssDefDisp = monaco.languages.typescript.javascriptDefaults.addExtraLib(data);
+    }
+    if(ssDefContent) load(ssDefContent);
+    else{
+        let data;
+        try {
+            data = await $.get('poofart');
+        }catch(e){
+            data = await $.get('defs/rage-server.d.ts');
+        }
+        load(data);
+    }
+}
+async function loadClientsideDefs(){
+    function load(data){
+        csDefContent = data;
+        csDefDisp = monaco.languages.typescript.javascriptDefaults.addExtraLib(data);
+    }
+    if(csDefContent) load(csDefContent);
+    else{
+        let data;
+        try {
+            data = await $.get('poofart');
+        }catch(e){
+            data = await $.get('defs/rage-client.d.ts');
+        }
+        load(data);
+    }
+}
+
+$(function(){
+    require(['vs/editor/editor.main'], function(){
+        monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+            noSemanticValidation: true,
+            noSyntaxValidation: false
+        });
+        monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+            target: monaco.languages.typescript.ScriptTarget.ES2015,
+            allowNonTsExtensions: true
+        });
+        editor = monaco.editor.create(document.getElementById('editor'), {
+            language: 'javascript',
+            theme: 'vs-dark',
+            fontSize: 16
+        });
+        setContext(CONTEXT_SERVER);
     });
 });
 
-const $tabs = $('#tabs');
-$tabs.on('click', '.tab:not(.active)', function(){
-    $(this).addClass('active').siblings('.active').removeClass('active');
-});
+function setContext(mode){
+    if(mode === CONTEXT_SERVER){
+        if(csDefDisp) csDefDisp.dispose();
+        csDefDisp = null;
+        return loadServersideDefs();
+    }else if(mode === CONTEXT_CLIENT){
+        if(ssDefDisp) ssDefDisp.dispose();
+        ssDefDisp = null;
+        return loadClientsideDefs();
+    }
+}
