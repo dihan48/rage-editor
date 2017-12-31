@@ -38,6 +38,10 @@ const CONTEXT_CLIENT = 1;
         }
     }
 
+    function updateLineCount(){
+        if(editor) $('#linenum').text(`Line ${editor.getPosition().lineNumber}, Column ${editor.getPosition().column}`);
+    }
+
     $(function(){
         require(['vs/editor/editor.main'], function(){
             monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
@@ -54,6 +58,8 @@ const CONTEXT_CLIENT = 1;
                 fontSize: 16
             });
             setContext(CONTEXT_SERVER);
+            editor.onDidChangeCursorPosition(updateLineCount);
+            updateLineCount();
         });
     });
 
