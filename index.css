@@ -98,10 +98,6 @@ html, body {
     background: #1e1e1e;
 }
 
-.tab.active .tab-close {
-    display: initial;
-}
-
 .tab.active:not(:first-of-type) {
     border-left: 1px solid #393939;
 }
@@ -112,6 +108,10 @@ html, body {
 
 .tab.active .tab-title {
     color: #e8e8e8;
+}
+
+.tab.active.unsaved .tab-title:after {
+    content: ' *'
 }
 
 .tab-title {

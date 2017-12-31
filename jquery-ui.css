@@ -95,6 +95,7 @@
 	position: absolute;
 	z-index: 9999;
 	max-width: 300px;
+	pointer-events: none;
 }
 body .ui-tooltip {
 	border-width: 1px;

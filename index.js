@@ -5,6 +5,9 @@ const CONTEXT_CLIENT = 1;
     let editor;
     let ssDefDisp, csDefDisp, ssDefContent, csDefContent;
 
+    const fileBuffers = [];
+    const fileDiskBuffers = [];
+
     async function loadServersideDefs(){
         setStatus('Loading Server-side Definitions...');
         function load(data){
@@ -46,6 +49,39 @@ const CONTEXT_CLIENT = 1;
         if(editor) $('#linenum').text(`Line ${editor.getPosition().lineNumber}, Column ${editor.getPosition().column}`);
     }
 
+    function fileNew(){
+        const $tabs = $('#tabs');
+        const nextCount = $tabs.children('.tab.new').length+1;
+        const $tab = $(`
+            <div class="tab new">
+                <span class="tab-title">New ${nextCount}</span>
+                <a href="#" class="tab-close">&times;</a>
+            </div>
+        `);
+        $tabs.append($tab);
+        fileBuffers.push('');
+        fileDiskBuffers.push(null);
+        return $tab;
+    }
+    function selectTab($tab){
+        const $currentTab = $tab.siblings('.active');
+        if($currentTab){
+            fileBuffers[$currentTab.first().index()] = editor.getValue();
+            $currentTab.find('.tab-close').hide();
+            $currentTab.removeClass('active');
+        }
+        $tab.addClass('active');
+        if($tab.siblings().length) $tab.find('.tab-close').show();
+        editor.setValue(fileBuffers[$tab.index()]);
+    }
+    function closeTab($tab){
+        if($tab.siblings('.tab').length === 0) return;
+        fileBuffers.splice($tab.index(), 1);
+        const $nextTab = $tab.index() === 0 ? $tab.next('.tab') : $tab.prev('.tab');
+        $tab.remove();
+        selectTab($nextTab);
+    }
+
     $(function(){
         require(['vs/editor/editor.main'], function(){
             monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
@@ -61,9 +97,21 @@ const CONTEXT_CLIENT = 1;
                 theme: 'vs-dark',
                 fontSize: 16
             });
+
+            editor.onDidChangeModelContent(function(e){
+                console.log(e);
+            });
+
+            selectTab(fileNew());
+
+            // autocomplete context
             setContext(CONTEXT_SERVER);
+
+            // Line status
             editor.onDidChangeCursorPosition(updateLineCount);
             updateLineCount();
+
+            // Display
             show();
         });
 
@@ -74,6 +122,7 @@ const CONTEXT_CLIENT = 1;
             setStatus($this.data('action'));
             switch($this.data('action')){
                 case 'fileNew':
+                    selectTab(fileNew());
                     break;
                 case 'fileOpen':
                     break;
@@ -81,10 +130,26 @@ const CONTEXT_CLIENT = 1;
                     break;
                 case 'fileSaveAs':
                     break;
+                case 'runLocally':
+                    break;
+                case 'runServer':
+                    break;
+                case 'runAllClients':
+                    break;
             }
         }).on('mousedown', '.toolbar-btn', function(e){
             e.preventDefault();
         }).tooltip();
+
+        // Tabs
+        $('#tabs').on('click', '.tab', function(e){
+            e.preventDefault();
+            selectTab($(this));
+        }).on('click', '.tab-close', function(e){
+            e.preventDefault();
+            const $tab = $(this).closest('.tab');
+            closeTab($tab);
+        });
     });
 
     window.setContext = (mode) => {
