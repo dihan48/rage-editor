@@ -68,7 +68,8 @@ const CONTEXT_CLIENT = 1;
         });
 
         // Toolbar buttons
-        $('#toolbar').on('click', '.toolbar-btn', function(){
+        $('#toolbar').on('click', '.toolbar-btn', function(e){
+            e.preventDefault();
             const $this = $(this);
             setStatus($this.data('action'));
             switch($this.data('action')){
@@ -81,6 +82,8 @@ const CONTEXT_CLIENT = 1;
                 case 'fileSaveAs':
                     break;
             }
+        }).on('mousedown', '.toolbar-btn', function(e){
+            e.preventDefault();
         }).tooltip();
     });
 
