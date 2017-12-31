@@ -104,7 +104,7 @@ const CONTEXT_CLIENT = 1;
                 const idx = $tab.index();
                 const val = editor.getValue();
                 fileBuffers[idx] = val;
-                const disk = fileDiskBuffers[val];
+                const disk = fileDiskBuffers[idx];
                 if(disk !== val){
                     if(disk === null){
                         if(val.length) $tab.addClass('unsaved');
