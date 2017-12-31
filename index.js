@@ -95,7 +95,8 @@ const CONTEXT_CLIENT = 1;
             editor = monaco.editor.create(document.getElementById('editor'), {
                 language: 'javascript',
                 theme: 'vs-dark',
-                fontSize: 16
+                fontSize: 16,
+                links: false
             });
 
             editor.onDidChangeModelContent(function(){
@@ -110,6 +111,42 @@ const CONTEXT_CLIENT = 1;
                         else $tab.removeClass('unsaved');
                     }else $tab.addClass('unsaved');
                 }else $tab.removeClass('unsaved');
+            });
+
+            editor.addAction({
+                id: 'runSelectionLocally',
+                label: 'Run Selection Locally',
+                precondition: 'editorHasSelection',
+                keybindingContext: null,
+                contextMenuGroupId: 'runSelection',
+                contextMenuOrder: 0,
+                run: (editor) => {
+
+                }
+            });
+
+            editor.addAction({
+                id: 'runSelectionServer',
+                label: 'Run Selection on Server',
+                precondition: 'editorHasSelection',
+                keybindingContext: null,
+                contextMenuGroupId: 'runSelection',
+                contextMenuOrder: 0,
+                run: (editor) => {
+
+                }
+            });
+
+            editor.addAction({
+                id: 'runSelectionAllClients',
+                label: 'Run Selection on All Clients',
+                precondition: 'editorHasSelection',
+                keybindingContext: null,
+                contextMenuGroupId: 'runSelection',
+                contextMenuOrder: 0,
+                run: (editor) => {
+
+                }
             });
 
             selectTab(fileNew());
