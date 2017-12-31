@@ -12,6 +12,7 @@ html, body {
 }
 
 #container {
+    display: none;
     margin: 50px auto;
     padding: 0;
     width: 1000px;
@@ -42,6 +43,10 @@ html, body {
     color: #e8e8e8;
     font-size: 12px;
     line-height: 25px;
+}
+
+#status {
+    float: right;
 }
 
 #tabs {

@@ -6,6 +6,7 @@ const CONTEXT_CLIENT = 1;
     let ssDefDisp, csDefDisp, ssDefContent, csDefContent;
 
     async function loadServersideDefs(){
+        setStatus('Loading Server-side Definitions...');
         function load(data){
             ssDefContent = data;
             ssDefDisp = monaco.languages.typescript.javascriptDefaults.addExtraLib(data);
@@ -20,8 +21,10 @@ const CONTEXT_CLIENT = 1;
             }
             load(data);
         }
+        setStatus(null);
     }
     async function loadClientsideDefs(){
+        setStatus('Loading Client-side Definitions...');
         function load(data){
             csDefContent = data;
             csDefDisp = monaco.languages.typescript.javascriptDefaults.addExtraLib(data);
@@ -36,6 +39,7 @@ const CONTEXT_CLIENT = 1;
             }
             load(data);
         }
+        setStatus(null);
     }
 
     function updateLineCount(){
@@ -60,6 +64,7 @@ const CONTEXT_CLIENT = 1;
             setContext(CONTEXT_SERVER);
             editor.onDidChangeCursorPosition(updateLineCount);
             updateLineCount();
+            show();
         });
     });
 
@@ -73,5 +78,19 @@ const CONTEXT_CLIENT = 1;
             ssDefDisp = null;
             return loadClientsideDefs();
         }
+    };
+    window.setStatus = (status) => {
+        $('#status').text(status);
+    };
+    window.show = () => {
+        $('#container').show();
+        if(editor) {
+            editor.layout();
+            editor.focus();
+        }
+    };
+    window.hide = () => {
+        $('#container').hide();
+        if(editor && editor.isFocused()) document.activeElement.blur();
     };
 })();
