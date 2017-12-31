@@ -110,8 +110,12 @@ html, body {
     color: #e8e8e8;
 }
 
-.tab.active.unsaved .tab-title:after {
+.tab.unsaved .tab-title:after {
     content: ' *'
+}
+
+.flt-right {
+    float: right;
 }
 
 .tab-title {

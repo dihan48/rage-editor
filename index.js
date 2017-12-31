@@ -2,7 +2,7 @@ const CONTEXT_SERVER = 0;
 const CONTEXT_CLIENT = 1;
 
 (function(){
-    let editor;
+    let editor, currentContext;
     let ssDefDisp, csDefDisp, ssDefContent, csDefContent;
 
     const fileBuffers = [];
@@ -66,7 +66,7 @@ const CONTEXT_CLIENT = 1;
     function selectTab($tab){
         const $currentTab = $tab.siblings('.active');
         if($currentTab){
-            fileBuffers[$currentTab.first().index()] = editor.getValue();
+            if(editor) fileBuffers[$currentTab.first().index()] = editor.getValue();
             $currentTab.find('.tab-close').hide();
             $currentTab.removeClass('active');
         }
@@ -98,8 +98,18 @@ const CONTEXT_CLIENT = 1;
                 fontSize: 16
             });
 
-            editor.onDidChangeModelContent(function(e){
-                console.log(e);
+            editor.onDidChangeModelContent(function(){
+                const $tab = $('.tab.active').eq(0);
+                const idx = $tab.index();
+                const val = editor.getValue();
+                fileBuffers[idx] = val;
+                const disk = fileDiskBuffers[val];
+                if(disk !== val){
+                    if(disk === null){
+                        if(val.length) $tab.addClass('unsaved');
+                        else $tab.removeClass('unsaved');
+                    }else $tab.addClass('unsaved');
+                }else $tab.removeClass('unsaved');
             });
 
             selectTab(fileNew());
@@ -114,6 +124,8 @@ const CONTEXT_CLIENT = 1;
             // Display
             show();
         });
+
+        $('.toolbar-btn').tooltip();
 
         // Toolbar buttons
         $('#toolbar').on('click', '.toolbar-btn', function(e){
@@ -136,10 +148,16 @@ const CONTEXT_CLIENT = 1;
                     break;
                 case 'runAllClients':
                     break;
+                case 'toggleContext':
+                    if(currentContext === CONTEXT_SERVER) setContext(CONTEXT_CLIENT);
+                    else setContext(CONTEXT_SERVER);
+                    $this.tooltip('close');
+                    $this.tooltip('open');
+                    break;
             }
         }).on('mousedown', '.toolbar-btn', function(e){
             e.preventDefault();
-        }).tooltip();
+        });
 
         // Tabs
         $('#tabs').on('click', '.tab', function(e){
@@ -153,15 +171,21 @@ const CONTEXT_CLIENT = 1;
     });
 
     window.setContext = (mode) => {
+        currentContext = mode;
         if(mode === CONTEXT_SERVER){
             if(csDefDisp) csDefDisp.dispose();
             csDefDisp = null;
+            $('.toolbar-btn[data-action="toggleContext"]').attr('title', 'Use Client-side Context');
             return loadServersideDefs();
         }else if(mode === CONTEXT_CLIENT){
             if(ssDefDisp) ssDefDisp.dispose();
             ssDefDisp = null;
+            $('.toolbar-btn[data-action="toggleContext"]').attr('title', 'Use Server-side Context');
             return loadClientsideDefs();
         }
+    };
+    window.getContext = () => {
+        return currentContext;
     };
     window.setStatus = (status) => {
         $('#status').text(status);
