@@ -4,14 +4,17 @@
         <meta charset="UTF-8">
         <title>RAGE:MP Debugger</title>
         <link rel="stylesheet" href="index.css"/>
+        <link rel="stylesheet" href="jquery-ui.css"/>
         <script type="text/javascript" src="jquery.min.js"></script>
+        <script type="text/javascript" src="jquery-ui.min.js"></script>
     </head>
     <body>
         <div id="container">
             <div id="toolbar">
-                <span class="toolbar-btn" id="toolbar-btn-new"></span>
-                <span class="toolbar-btn" id="toolbar-btn-save"></span>
-                <span class="toolbar-btn" id="toolbar-btn-saveas"></span>
+                <span class="toolbar-btn" data-action="fileNew" title="New"></span>
+                <span class="toolbar-btn" data-action="fileOpen" title="Open"></span>
+                <span class="toolbar-btn" data-action="fileSave" title="Save"></span>
+                <span class="toolbar-btn" data-action="fileSaveAs" title="Save As"></span>
             </div>
             <div id="tabs">
                 <div class="tab">

@@ -66,6 +66,22 @@ const CONTEXT_CLIENT = 1;
             updateLineCount();
             show();
         });
+
+        // Toolbar buttons
+        $('#toolbar').on('click', '.toolbar-btn', function(){
+            const $this = $(this);
+            setStatus($this.data('action'));
+            switch($this.data('action')){
+                case 'fileNew':
+                    break;
+                case 'fileOpen':
+                    break;
+                case 'fileSave':
+                    break;
+                case 'fileSaveAs':
+                    break;
+            }
+        }).tooltip();
     });
 
     window.setContext = (mode) => {
