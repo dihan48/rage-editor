@@ -48,7 +48,6 @@ const CONTEXT_CLIENT = 1;
     function updateLineCount(){
         if(editor) $('#linenum').text(`Line ${editor.getPosition().lineNumber}, Column ${editor.getPosition().column}`);
     }
-
     function fileNew(){
         const $tabs = $('#tabs');
         const nextCount = $tabs.children('.tab.new').length+1;
@@ -82,6 +81,32 @@ const CONTEXT_CLIENT = 1;
         selectTab($nextTab);
     }
 
+    function evalLocal(code){
+        if(mp) mp.trigger('debugr:runLocal', code);
+        setStatus('Running Locally...');
+        setTimeout(() => onEvalLocalResult('OK'), 1000);
+    }
+    function evalServer(code){
+        if(mp) mp.trigger('debugr:runServer', code);
+        setStatus('Running on Server...');
+        setTimeout(() => onEvalServerResult('OK'), 1000);
+    }
+    function evalClients(code){
+        if(mp) mp.trigger('debugr:runClients', code);
+        setStatus('Running on All Clients... (1/27)');
+        setTimeout(() => onEvalClientsResult('OK'), 1000);
+    }
+
+    window.onEvalLocalResult = function(result){
+        setStatus(null);
+    };
+    window.onEvalServerResult = function(result){
+        setStatus(null);
+    };
+    window.onEvalClientsResult = function(result){
+        setStatus(null);
+    };
+
     $(function(){
         require(['vs/editor/editor.main'], function(){
             monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
@@ -90,8 +115,11 @@ const CONTEXT_CLIENT = 1;
             });
             monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
                 target: monaco.languages.typescript.ScriptTarget.ES2015,
+                noLib: true,
                 allowNonTsExtensions: true
             });
+            $.get('defs/lib.es5.d.ts').then((res) => monaco.languages.typescript.javascriptDefaults.addExtraLib(res, 'defs/lib.es5.d.ts'));
+            $.get('defs/base.d.ts').then((res) => monaco.languages.typescript.javascriptDefaults.addExtraLib(res, 'defs/base.d.ts'));
             editor = monaco.editor.create(document.getElementById('editor'), {
                 language: 'javascript',
                 theme: 'vs-dark',
@@ -120,11 +148,8 @@ const CONTEXT_CLIENT = 1;
                 keybindingContext: null,
                 contextMenuGroupId: 'runSelection',
                 contextMenuOrder: 0,
-                run: (editor) => {
-
-                }
+                run: (e) => evalLocal(e.getModel().getValueInRange(e.getSelection()))
             });
-
             editor.addAction({
                 id: 'runSelectionServer',
                 label: 'Run Selection on Server',
@@ -132,11 +157,8 @@ const CONTEXT_CLIENT = 1;
                 keybindingContext: null,
                 contextMenuGroupId: 'runSelection',
                 contextMenuOrder: 0,
-                run: (editor) => {
-
-                }
+                run: (e) => evalServer(e.getModel().getValueInRange(e.getSelection()))
             });
-
             editor.addAction({
                 id: 'runSelectionAllClients',
                 label: 'Run Selection on All Clients',
@@ -144,9 +166,7 @@ const CONTEXT_CLIENT = 1;
                 keybindingContext: null,
                 contextMenuGroupId: 'runSelection',
                 contextMenuOrder: 0,
-                run: (editor) => {
-
-                }
+                run: (e) => evalClients(e.getModel().getValueInRange(e.getSelection()))
             });
 
             selectTab(fileNew());
@@ -180,10 +200,13 @@ const CONTEXT_CLIENT = 1;
                 case 'fileSaveAs':
                     break;
                 case 'runLocally':
+                    if(editor) evalLocal(editor.getValue());
                     break;
                 case 'runServer':
+                    if(editor) evalServer(editor.getValue());
                     break;
                 case 'runAllClients':
+                    if(editor) evalClients(editor.getValue());
                     break;
                 case 'toggleContext':
                     if(currentContext === CONTEXT_SERVER) setContext(CONTEXT_CLIENT);
