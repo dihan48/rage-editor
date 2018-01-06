@@ -13,7 +13,7 @@ gulp.task('clean', () => {
 });
 
 gulp.task('minify', () => {
-    const client = gulp.src(['./src/client/**/*.js', '!./src/client/vs/**/*'])
+    const client = gulp.src(['./src/client/**/*.js', '!./src/client/html/vs/**/*'])
         .pipe(uglify())
         .pipe(gulp.dest('./dist/client_packages/rage-editor'));
 
@@ -25,7 +25,7 @@ gulp.task('minify', () => {
 });
 
 gulp.task('css', () => {
-    return gulp.src(['./src/client/**/*.scss', './src/client/**/*.css', '!./src/client/vs/**/*'])
+    return gulp.src(['./src/client/**/*.scss', './src/client/**/*.css', '!./src/client/html/vs/**/*'])
         .pipe(sass({
             outputStyle: 'compressed'
         }).on('error', sass.logError))
@@ -33,11 +33,11 @@ gulp.task('css', () => {
 });
 
 gulp.task('other', () => {
-    const client = gulp.src(['./src/client/**/*.*', '!./src/client/**/*.scss', '!./src/client/**/*.css', '!./src/client/**/*.js', '!./src/client/vs/**/*'])
+    const client = gulp.src(['./src/client/**/*.*', '!./src/client/**/*.scss', '!./src/client/**/*.css', '!./src/client/**/*.js', '!./src/client/html/vs/**/*'])
         .pipe(gulp.dest('./dist/client_packages/rage-editor'));
 
-    const clientVS = gulp.src('./src/client/vs/**/*')
-        .pipe(gulp.dest('./dist/client_packages/rage-editor/vs'));
+    const clientVS = gulp.src('./src/client/html/vs/**/*')
+        .pipe(gulp.dest('./dist/client_packages/rage-editor/html/vs'));
 
     return merge(client, clientVS);
 });
