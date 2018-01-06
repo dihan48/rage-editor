@@ -72,6 +72,7 @@ const CONTEXT_CLIENT = 1;
         $tab.addClass('active');
         if($tab.siblings().length) $tab.find('.tab-close').show();
         editor.setValue(fileBuffers[$tab.index()]);
+        editor.focus();
     }
     function closeTab($tab){
         if($tab.siblings('.tab').length === 0) return;
@@ -182,7 +183,6 @@ const CONTEXT_CLIENT = 1;
         $('#toolbar').on('click', '.toolbar-btn', function(e){
             e.preventDefault();
             const $this = $(this);
-            setStatus($this.data('action'));
             switch($this.data('action')){
                 case 'fileNew':
                     selectTab(fileNew());
