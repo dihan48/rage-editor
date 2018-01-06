@@ -38,15 +38,15 @@ html, body {
     height: 25px;
     border-radius: 4px;
     margin: 0;
-}
 
-.toolbar-btn:hover {
-    background-color: #585858;
-    border: 1px solid #909090;
-}
+    &:hover {
+        background-color: #585858;
+        border: 1px solid #909090;
+    }
 
-.toolbar-btn:active {
-    background-color: rgba(88, 88, 88, 0.7);
+    &:active {
+        background-color: rgba(88, 88, 88, 0.7);
+    }
 }
 
 #editor {
@@ -65,12 +65,12 @@ html, body {
     box-shadow: 0 -1px 8px 0 rgba(0,0,0,0.7);
     z-index: 1;
     padding: 0 10px;
-}
 
-#statusbar > span {
-    color: #e8e8e8;
-    font-size: 12px;
-    line-height: 25px;
+    > span {
+        color: #e8e8e8;
+        font-size: 12px;
+        line-height: 25px;
+    }
 }
 
 #status {
@@ -91,27 +91,27 @@ html, body {
     border-bottom: 1px solid #393939;
     font-size: 15px;
     background: #2d2d2d;
-}
 
-.tab.active {
-    border-bottom: none;
-    background: #1e1e1e;
-}
+    &.active {
+        border-bottom: none;
+        background: #1e1e1e;
 
-.tab.active:not(:first-of-type) {
-    border-left: 1px solid #393939;
-}
+        &:not(:first-of-type) {
+            border-left: 1px solid #393939;
+        }
 
-.tab.active:not(:last-of-type) {
-    border-right: 1px solid #393939;
-}
+        &:not(:last-of-type) {
+            border-right: 1px solid #393939;
+        }
 
-.tab.active .tab-title {
-    color: #e8e8e8;
-}
+        .tab-title {
+            color: #e8e8e8;
+        }
+    }
 
-.tab.unsaved .tab-title:after {
-    content: ' *'
+    &.unsaved .tab-title:after {
+        content: ' *'
+    }
 }
 
 .flt-right {
