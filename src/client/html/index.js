@@ -229,12 +229,12 @@ const CONTEXT_CLIENT = 1;
         if(mode === CONTEXT_SERVER){
             if(csDefDisp) csDefDisp.dispose();
             csDefDisp = null;
-            $('.toolbar-btn[data-action="toggleContext"]').attr('title', 'Use Client-side Context');
+            $('.toolbar-btn[data-action="toggleContext"]').attr('title', 'Use Client-side Context').text('Server-side');
             return loadServersideDefs();
         }else if(mode === CONTEXT_CLIENT){
             if(ssDefDisp) ssDefDisp.dispose();
             ssDefDisp = null;
-            $('.toolbar-btn[data-action="toggleContext"]').attr('title', 'Use Server-side Context');
+            $('.toolbar-btn[data-action="toggleContext"]').attr('title', 'Use Server-side Context').text('Client-side');
             return loadClientsideDefs();
         }
     };

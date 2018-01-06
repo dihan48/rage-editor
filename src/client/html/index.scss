@@ -29,23 +29,32 @@ html, body {
     z-index: 2;
     background: #252525;
     border-bottom: 1px solid #393939;
-    padding: 5px;
+    padding: 3px;
 }
 
 .toolbar-btn {
     display: inline-block;
-    width: 25px;
     height: 25px;
     border-radius: 4px;
-    margin: 0;
+    margin: 2px;
+    color: #c0c0c0;
+    line-height: 25px;
+    text-align: center;
+    border: 1px solid #393939;
+    padding: 0 5px;
+    cursor: pointer;
 
     &:hover {
         background-color: #585858;
-        border: 1px solid #909090;
+        border-color: #909090;
     }
 
     &:active {
         background-color: rgba(88, 88, 88, 0.7);
+    }
+
+    &.square {
+        width: 25px;
     }
 }
 
@@ -116,6 +125,10 @@ html, body {
 
 .flt-right {
     float: right;
+}
+
+.flt-left {
+    float: left;
 }
 
 .tab-title {
