@@ -82,19 +82,16 @@ const CONTEXT_CLIENT = 1;
     }
 
     function evalLocal(code){
-        if(mp) mp.trigger('debugr:runLocal', code);
+        if(mp) mp.trigger('reditor:runLocal', code);
         setStatus('Running Locally...');
-        setTimeout(() => onEvalLocalResult('OK'), 1000);
     }
     function evalServer(code){
-        if(mp) mp.trigger('debugr:runServer', code);
+        if(mp) mp.trigger('reditor:runServer', code);
         setStatus('Running on Server...');
-        setTimeout(() => onEvalServerResult('OK'), 1000);
     }
     function evalClients(code){
-        if(mp) mp.trigger('debugr:runClients', code);
-        setStatus('Running on All Clients... (1/27)');
-        setTimeout(() => onEvalClientsResult('OK'), 1000);
+        if(mp) mp.trigger('reditor:runClients', code);
+        setStatus('Running on All Clients...');
     }
 
     window.onEvalLocalResult = function(result){
