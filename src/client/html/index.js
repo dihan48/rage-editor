@@ -72,7 +72,7 @@ const CONTEXT_CLIENT = 1;
         $tab.addClass('active');
         if($tab.siblings().length) $tab.find('.tab-close').show();
         editor.setValue(fileBuffers[$tab.index()]);
-        editor.focus();
+        //editor.focus();
     }
     function closeTab($tab){
         if($tab.siblings('.tab').length === 0) return;
@@ -188,6 +188,8 @@ const CONTEXT_CLIENT = 1;
                     selectTab(fileNew());
                     break;
                 case 'fileOpen':
+                    $('#popup-open').show();
+                    $('#container').css('pointer-events', 'none');
                     break;
                 case 'fileSave':
                     break;
@@ -221,6 +223,19 @@ const CONTEXT_CLIENT = 1;
             e.preventDefault();
             const $tab = $(this).closest('.tab');
             closeTab($tab);
+        });
+
+        // Open File
+        $('#openfile-close').on('click', function(e){
+            e.preventDefault();
+            $('#popup-open').hide();
+            $('#container').css('pointer-events', 'auto');
+            if(editor) editor.focus();
+        });
+        $('#openfile-list').on('click', 'li > a', function(e){
+            e.preventDefault();
+            const $this = $(this);
+            $this.parent().addClass('active').siblings('.active').removeClass('active');
         });
     });
 

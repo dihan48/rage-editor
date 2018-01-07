@@ -142,3 +142,66 @@ html, body {
     color: #e8e8e8;
     margin-left: 3px;
 }
+
+.popup {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 4px;
+    background: #2d2d2d;
+    padding: 10px;
+    color: #ffffff;
+    box-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.3);
+    width: 250px;
+}
+
+#openfile-list {
+    background: #111111;
+    border-radius: 4px;
+    width: 100%;
+    min-height: 120px;
+    max-height: 360px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin: 0;
+    list-style-type: none;
+    padding: 0;
+
+    > li {
+
+        > a {
+            padding: 2px 5px;
+            display: block;
+            text-decoration: none;
+            color: #e9e9e9;
+        }
+
+        &.active {
+            background: rgba(217, 217, 217, 0.29);
+        }
+    }
+}
+
+.popup-btn {
+    display: inline-block;
+    border-radius: 4px;
+    margin-top: 8px;
+    color: #c0c0c0;
+    line-height: 25px;
+    text-align: center;
+    border: 1px solid #4e4e4e;
+    padding: 5px 10px;
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover {
+        background-color: #585858;
+        border-color: #909090;
+    }
+
+    &:active {
+        background-color: rgba(88, 88, 88, 0.7);
+    }
+}
