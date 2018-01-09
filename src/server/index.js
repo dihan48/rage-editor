@@ -7,7 +7,7 @@ mp.events.add('reditor:runServer', (player, code) => {
 
 mp.events.add('reditor:runClients', (player, code) => {
     mp.players.forEach((player) => {
-        player.call('reditor:runClientsEval', code);
+        player.call('reditor:runClientsEval', [code]);
     });
     player.call('reditor:runClientsRes');
 });
