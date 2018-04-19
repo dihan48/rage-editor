@@ -14,7 +14,10 @@ app.listen(config.port, () => {
     tunnel.then((url) => console.log('NGROK URL '+url));
 });
 
-/*
+mp.events.add('reditor:requestInit', (player) => {
+    tunnel.then((url) => player.call('reditor:init', [url]));
+});
+
 mp.events.add('reditor:runServer', (player, code) => {
     try {
         eval(code);
@@ -27,4 +30,4 @@ mp.events.add('reditor:runClients', (player, code) => {
         player.call('reditor:runClientsEval', [code]);
     });
     player.call('reditor:runClientsRes');
-});*/
+});

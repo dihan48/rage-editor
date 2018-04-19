@@ -2,7 +2,11 @@ let browser;
 let shown = false;
 
 mp.events.add('guiReady', () => {
-    if(!browser) browser = mp.browsers.new('package://rage-editor/html/index.html');
+    mp.events.callRemote('reditor:requestInit');
+});
+
+mp.events.add('reditor:init', (url) => {
+    if(!browser) browser = mp.browsers.new(url);
 });
 
 mp.keys.bind(0x77, false, () => {
