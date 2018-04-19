@@ -1,59 +1,72 @@
-const gulp      = require('gulp');
-const uglifyes  = require('uglify-es');
-const uglify    = require('gulp-uglify/composer')(uglifyes, console);
-const del       = require('del');
-const sass      = require('gulp-sass');
-const merge     = require('merge-stream');
+const gulp                  = require('gulp');
+const del                   = require('del');
+const webpack               = require('webpack');
+const webpackStream         = require('webpack-stream');
+const merge                 = require('merge-stream');
+const sass                  = require('gulp-sass');
+const rename                = require('gulp-rename');
+const inline                = require('gulp-inline');
+const htmlmin               = require('gulp-htmlmin');
+
+const PACKAGE_NAME  = "rage-editor";
+
+function buildHTML(mode){
+    const prod = mode === 'production';
+
+    const other = gulp.src(['./src/server/static/**/*', '!./src/server/static/index.js', '!./src/server/static/index.scss', '!./src/server/static/index.html'])
+        .pipe(gulp.dest(`./dist/packages/${PACKAGE_NAME}/static`));
+
+    const html = gulp.src('./src/server/static/index.html')
+        .pipe(inline({
+            css: () => sass({ outputStyle: prod ? 'compressed' : 'nested' }),
+            js: () => webpackStream({
+                plugins: [
+                    new webpack.IgnorePlugin(/vs\/editor\/editor\.main/)
+                ],
+                mode
+            }, webpack),
+            ignore: ['vs/loader.js']
+        }));
+    if(prod) html.pipe(htmlmin({collapseWhitespace: true}));
+    html.pipe(gulp.dest(`./dist/packages/${PACKAGE_NAME}/static`));
+
+    return merge(other, html);
+}
+function buildClient(mode){
+    return gulp.src('./src/client/index.js')
+        .pipe(webpackStream({
+            mode
+        }, webpack))
+        .pipe(rename('index.js'))
+        .pipe(gulp.dest(`./dist/client_packages/${PACKAGE_NAME}`));
+}
 
 gulp.task('clean', () => {
     return del([
         'dist/**/*',
         '!dist/packages',
-        '!dist/packages/rage-editor',
-        '!dist/packages/rage-editor/node_modules/**'
+        `!dist/packages/${PACKAGE_NAME}`,
+        `!dist/packages/${PACKAGE_NAME}/node_modules/**`
     ]);
 });
 
-gulp.task('minify', () => {
-    const client = gulp.src(['./src/client/**/*.js', '!./src/client/html/vs/**/*'])
-        .pipe(uglify())
-        .pipe(gulp.dest('./dist/client_packages/rage-editor'));
-
-    const server = gulp.src('./src/server/**/*.js')
-        .pipe(uglify())
-        .pipe(gulp.dest('./dist/packages/rage-editor'));
-
-    return merge(client, server);
+gulp.task('build:js:client', () => buildClient('production'));
+gulp.task('build:js:client:dev', () => buildClient('development'));
+gulp.task('build:html', () => buildHTML('production'));
+gulp.task('build:html:dev', () => buildHTML('development'));
+gulp.task('build:server', () => {
+    return gulp.src('./src/server/*')
+        .pipe(gulp.dest(`./dist/packages/${PACKAGE_NAME}`));
 });
 
-gulp.task('css', () => {
-    return gulp.src(['./src/client/**/*.scss', './src/client/**/*.css', '!./src/client/html/vs/**/*'])
-        .pipe(sass({
-            outputStyle: 'compressed'
-        }).on('error', sass.logError))
-        .pipe(gulp.dest('./dist/client_packages/rage-editor'));
-});
+gulp.task('build', gulp.series('clean', gulp.parallel('build:js:client', 'build:html', 'build:server')));
+gulp.task('watch', gulp.series('clean', gulp.parallel('build:js:client:dev', 'build:html:dev', 'build:server', (done) => {
+    // client js
+    gulp.watch('./src/client/*.js', gulp.series('build:js:client:dev'));
 
-gulp.task('other', () => {
-    const client = gulp.src(['./src/client/**/*.*', '!./src/client/**/*.scss', '!./src/client/**/*.css', '!./src/client/**/*.js', '!./src/client/html/vs/**/*'])
-        .pipe(gulp.dest('./dist/client_packages/rage-editor'));
+    // html
+    gulp.watch(['./src/server/static/**/*'], gulp.series('build:html:dev'));
 
-    const clientVS = gulp.src('./src/client/html/vs/**/*')
-        .pipe(gulp.dest('./dist/client_packages/rage-editor/html/vs'));
-
-    return merge(client, clientVS);
-});
-
-gulp.task('build', gulp.parallel('minify', 'css', 'other'));
-
-gulp.task('default', gulp.series('clean', 'build'));
-
-gulp.task('copy', gulp.series('clean', gulp.parallel('css', () => {
-    const client = gulp.src(['./src/client/**/*', '!./src/client/**/*.scss'])
-        .pipe(gulp.dest('./dist/client_packages/rage-editor'));
-
-    const server = gulp.src(['./src/server/**/*', '!./src/server/node_modules/**/*'])
-        .pipe(gulp.dest('./dist/packages/rage-editor'));
-
-    return merge(client, server);
+    // server
+    gulp.watch('./src/server/*', gulp.series('build:server'));
 })));
