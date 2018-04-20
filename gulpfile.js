@@ -20,6 +20,14 @@ function buildHTML(mode){
         .pipe(inline({
             css: () => sass({ outputStyle: prod ? 'compressed' : 'nested' }),
             js: () => webpackStream({
+                module: {
+                    rules: [
+                        {
+                            test: /\.js$/,
+                            use: ['babel-loader']
+                        }
+                    ]
+                },
                 plugins: [
                     new webpack.IgnorePlugin(/vs\/editor\/editor\.main/)
                 ],
