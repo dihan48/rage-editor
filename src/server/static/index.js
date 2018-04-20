@@ -244,7 +244,7 @@ class App extends React.Component {
     }
 
     evalLocal(code){
-        if(!code){
+        if(typeof code !== "string"){
             code = this.state.tabs[this.state.selectedTab].code;
         }
         if(mp) mp.trigger('reditor:runLocal', code);
@@ -252,7 +252,7 @@ class App extends React.Component {
     }
 
     evalServer(code){
-        if(!code){
+        if(typeof code !== "string"){
             code = this.state.tabs[this.state.selectedTab].code;
         }
         if(mp) mp.trigger('reditor:runServer', code);
@@ -260,7 +260,7 @@ class App extends React.Component {
     }
 
     evalClients(code){
-        if(!code){
+        if(typeof code !== "string"){
             code = this.state.tabs[this.state.selectedTab].code;
         }
         if(mp) mp.trigger('reditor:runClients', code);
@@ -268,7 +268,7 @@ class App extends React.Component {
     }
 }
 
-global.app = ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementById('root'));
 
 /*
 
@@ -541,4 +541,3 @@ const CONTEXT_CLIENT = 1;
     };
 })();
 */
-$('#container').show();
