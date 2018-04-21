@@ -18,6 +18,7 @@ import $ from 'jquery';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import MonacoEditor from 'react-monaco-editor';
+import Rnd from 'react-rnd';
 
 const CONTEXT_SERVER = 0;
 const CONTEXT_CLIENT = 1;
@@ -32,13 +33,14 @@ class App extends React.Component {
             context: CONTEXT_SERVER,
             tabs: [],
             selectedTab: -1,
-            show: false,
+            show: true,
             showOpenFile: false
         };
         this.onClickAnywhere = this.onClickAnywhere.bind(this);
         this.editorWillMount = this.editorWillMount.bind(this);
         this.editorDidMount = this.editorDidMount.bind(this);
         this.onEditorChanged = this.onEditorChanged.bind(this);
+        this.onResize = this.onResize.bind(this);
         this.setContext = this.setContext.bind(this);
         this.onClickContext = this.onClickContext.bind(this);
         this.fileNew = this.fileNew.bind(this);
@@ -80,6 +82,10 @@ class App extends React.Component {
 
     componentWillUnmount(){
         document.body.removeEventListener('mousedown', this.onClickAnywhere);
+    }
+
+    onResize(){
+        if(this.editor) this.editor.layout();
     }
 
     onClickAnywhere(e){
@@ -165,49 +171,66 @@ class App extends React.Component {
     render(){
         return (
             <React.Fragment>
-                <div id="container" style={{visibility: this.state.show ? "visible" : "hidden"}}>
-                    <div id="toolbar">
-                        <span className="toolbar-btn flt-left" onClick={this.fileNew}>New</span>
-                        <span className="toolbar-btn flt-left" onClick={this.showFileOpen}>Open</span>
-                        <span className="toolbar-btn flt-left" data-action="fileSave">Save</span>
-                        <span className="toolbar-btn flt-left" data-action="fileSaveAs">Save As</span>
-                        <span className="toolbar-btn flt-right" onClick={this.onClickContext} title={this.state.context === CONTEXT_CLIENT ? "Use Server-side Context" : "Use Client-side Context"}>{this.state.context === CONTEXT_CLIENT ? "Client-side" : "Server-side"}</span>
-                        <span className="toolbar-btn square flt-right" onClick={this.evalClients} title="Run on All Clients">C</span>
-                        <span className="toolbar-btn square flt-right" onClick={this.evalServer} title="Run on Server">S</span>
-                        <span className="toolbar-btn square flt-right" onClick={this.evalLocal} title="Run Locally">L</span>
+                <Rnd onResize={this.onResize}
+                    dragHandleClassName="#toolbar"
+                    cancel=".toolbar-btn"
+                    resizeHandleClasses={{
+                        bottomRight: "resize"
+                    }}
+                    enableResizing={{
+                        bottom: false,
+                        bottomLeft: false,
+                        bottomRight: true,
+                        left: false,
+                        right: false,
+                        top: false,
+                        topLeft: false,
+                        topRight: false
+                    }}>
+                    <div id="container" style={{visibility: this.state.show ? "visible" : "hidden"}}>
+                        <div id="toolbar">
+                            <span className="toolbar-btn flt-left" onClick={this.fileNew}>New</span>
+                            <span className="toolbar-btn flt-left" onClick={this.showFileOpen}>Open</span>
+                            <span className="toolbar-btn flt-left" data-action="fileSave">Save</span>
+                            <span className="toolbar-btn flt-left" data-action="fileSaveAs">Save As</span>
+                            <span className="toolbar-btn flt-right" onClick={this.onClickContext} title={this.state.context === CONTEXT_CLIENT ? "Use Server-side Context" : "Use Client-side Context"}>{this.state.context === CONTEXT_CLIENT ? "Client-side" : "Server-side"}</span>
+                            <span className="toolbar-btn square flt-right" onClick={this.evalClients} title="Run on All Clients">C</span>
+                            <span className="toolbar-btn square flt-right" onClick={this.evalServer} title="Run on Server">S</span>
+                            <span className="toolbar-btn square flt-right" onClick={this.evalLocal} title="Run Locally">L</span>
+                        </div>
+                        <div id="tabs">
+                            {this.state.tabs.map((tab, idx) => {
+                                const classNames = ["tab"];
+                                const selected = this.state.selectedTab === idx;
+                                if(selected) classNames.push('active');
+                                return (
+                                    <div key={idx} className={classNames.join(' ')} onClick={() => this.selectTab(idx)}>
+                                        <span className="tab-title">{tab.new ? `New ${tab.count}` : 'something'}</span>
+                                        {selected && this.state.tabs.length > 1 && <a href="#" onClick={(e) => {e.stopPropagation(); this.closeTab(idx)}} className="tab-close">&times;</a>}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                        <div id="editor">
+                            <MonacoEditor
+                                language="javascript"
+                                theme="vs-dark"
+                                value={(this.state.tabs.length && this.state.selectedTab > -1) ? this.state.tabs[this.state.selectedTab].code : ""}
+                                onChange={this.onEditorChanged}
+                                editorWillMount={this.editorWillMount}
+                                editorDidMount={this.editorDidMount}
+                                options={{
+                                    fontSize: 16,
+                                    links: false
+                                }}
+                            />
+                        </div>
+                        <div id="statusbar">
+                            <span>Line {this.state.cursorLineNumber}, Column {this.state.cursorColumn}</span>
+                            <span style={{ float: 'right' }}>{this.state.status}</span>
+                        </div>
                     </div>
-                    <div id="tabs">
-                        {this.state.tabs.map((tab, idx) => {
-                            const classNames = ["tab"];
-                            const selected = this.state.selectedTab === idx;
-                            if(selected) classNames.push('active');
-                            return (
-                                <div key={idx} className={classNames.join(' ')} onClick={() => this.selectTab(idx)}>
-                                    <span className="tab-title">{tab.new ? `New ${tab.count}` : 'something'}</span>
-                                    {selected && this.state.tabs.length > 1 && <a href="#" onClick={(e) => {e.stopPropagation(); this.closeTab(idx)}} className="tab-close">&times;</a>}
-                                </div>
-                            )
-                        })}
-                    </div>
-                    <div id="editor">
-                        <MonacoEditor
-                            language="javascript"
-                            theme="vs-dark"
-                            value={(this.state.tabs.length && this.state.selectedTab > -1) ? this.state.tabs[this.state.selectedTab].code : ""}
-                            onChange={this.onEditorChanged}
-                            editorWillMount={this.editorWillMount}
-                            editorDidMount={this.editorDidMount}
-                            options={{
-                                fontSize: 16,
-                                links: false
-                            }}
-                        />
-                    </div>
-                    <div id="statusbar">
-                        <span>Line {this.state.cursorLineNumber}, Column {this.state.cursorColumn}</span>
-                        <span style={{ float: 'right' }}>{this.state.status}</span>
-                    </div>
-                </div>
+                </Rnd>
                 {this.state.show && this.state.showOpenFile && (
                     <div id="popup-open" className="popup">
                         <ul id="openfile-list">
