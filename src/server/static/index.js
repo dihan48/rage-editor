@@ -1,3 +1,17 @@
+/**
+ *    RAGE POLYFILL
+ */
+if(!global.mp){
+    global.mp = {
+        trigger: (event, ...params) => {
+            console.log(`> EVENT TRIGGERED: "${event}"`, params);
+        }
+    };
+}
+/**
+ *  END RAGE POLYFILL
+ */
+
 import 'babel-polyfill';
 
 import $ from 'jquery';
@@ -18,14 +32,18 @@ class App extends React.Component {
             context: CONTEXT_SERVER,
             tabs: [],
             selectedTab: -1,
-            show: false
+            show: false,
+            showOpenFile: false
         };
+        this.onClickAnywhere = this.onClickAnywhere.bind(this);
         this.editorWillMount = this.editorWillMount.bind(this);
         this.editorDidMount = this.editorDidMount.bind(this);
         this.onEditorChanged = this.onEditorChanged.bind(this);
         this.setContext = this.setContext.bind(this);
         this.onClickContext = this.onClickContext.bind(this);
         this.fileNew = this.fileNew.bind(this);
+        this.showFileOpen = this.showFileOpen.bind(this);
+        this.hideFileOpen = this.hideFileOpen.bind(this);
         this.selectTab = this.selectTab.bind(this);
         this.closeTab = this.closeTab.bind(this);
         this.setStatus = this.setStatus.bind(this);
@@ -39,6 +57,7 @@ class App extends React.Component {
             this.setState({
                 show: true
             });
+            if(this.editor) this.editor.focus();
         };
         window.hide = () => {
             this.setState({
@@ -55,6 +74,18 @@ class App extends React.Component {
         window.onEvalClientsResult = () => {
             this.setStatus(null);
         };
+
+        document.body.addEventListener('mousedown', this.onClickAnywhere);
+    }
+
+    componentWillUnmount(){
+        document.body.removeEventListener('mousedown', this.onClickAnywhere);
+    }
+
+    onClickAnywhere(e){
+        if(this.editor && this.state.show){
+            e.preventDefault();
+        }
     }
 
     onEditorChanged(value){
@@ -97,18 +128,47 @@ class App extends React.Component {
         // set default context
         this.setContext(this.state.context);
 
+        editor.addAction({
+            id: 'runSelectionLocally',
+            label: 'Run Selection Locally',
+            precondition: 'editorHasSelection',
+            keybindingContext: null,
+            contextMenuGroupId: 'runSelection',
+            contextMenuOrder: 0,
+            run: (e) => this.evalLocal(e.getModel().getValueInRange(e.getSelection()))
+        });
+
+        editor.addAction({
+            id: 'runSelectionServer',
+            label: 'Run Selection on Server',
+            precondition: 'editorHasSelection',
+            keybindingContext: null,
+            contextMenuGroupId: 'runSelection',
+            contextMenuOrder: 0,
+            run: (e) => this.evalServer(e.getModel().getValueInRange(e.getSelection()))
+        });
+
+        editor.addAction({
+            id: 'runSelectionAllClients',
+            label: 'Run Selection on All Clients',
+            precondition: 'editorHasSelection',
+            keybindingContext: null,
+            contextMenuGroupId: 'runSelection',
+            contextMenuOrder: 0,
+            run: (e) => this.evalClients(e.getModel().getValueInRange(e.getSelection()))
+        });
+
         // create first tab
-        if(!this.state.tabs.length) this.fileNew();
+        this.fileNew();
     }
 
     render(){
-        if(!this.state.show) return null;
         return (
             <React.Fragment>
-                <div id="container">
+                <div id="container" style={{visibility: this.state.show ? "visible" : "hidden"}}>
                     <div id="toolbar">
                         <span className="toolbar-btn flt-left" onClick={this.fileNew}>New</span>
-                        <span className="toolbar-btn flt-left" data-action="fileOpen">Open</span>
+                        <span className="toolbar-btn flt-left" onClick={this.showFileOpen}>Open</span>
                         <span className="toolbar-btn flt-left" data-action="fileSave">Save</span>
                         <span className="toolbar-btn flt-left" data-action="fileSaveAs">Save As</span>
                         <span className="toolbar-btn flt-right" onClick={this.onClickContext} title={this.state.context === CONTEXT_CLIENT ? "Use Server-side Context" : "Use Client-side Context"}>{this.state.context === CONTEXT_CLIENT ? "Client-side" : "Server-side"}</span>
@@ -148,17 +208,33 @@ class App extends React.Component {
                         <span style={{ float: 'right' }}>{this.state.status}</span>
                     </div>
                 </div>
-                <div id="popup-open" className="popup">
-                    <ul id="openfile-list">
-                        <li><a href="#">script1</a></li>
-                        <li><a href="#">script2</a></li>
-                        <li><a href="#">script3</a></li>
-                    </ul>
-                    <a href="#" className="popup-btn flt-right" id="openfile-open">Open</a>
-                    <a href="#" className="popup-btn flt-left" id="openfile-close">Close</a>
-                </div>
+                {this.state.show && this.state.showOpenFile && (
+                    <div id="popup-open" className="popup">
+                        <ul id="openfile-list">
+                            <li><a href="#">script1</a></li>
+                            <li><a href="#">script2</a></li>
+                            <li><a href="#">script3</a></li>
+                        </ul>
+                        <a href="#" className="popup-btn flt-right">Open</a>
+                        <a href="#" className="popup-btn flt-left" onClick={this.hideFileOpen}>Close</a>
+                    </div>
+                )}
             </React.Fragment>
         );
+    }
+
+    showFileOpen(){
+        this.setState({
+            showOpenFile: true
+        });
+        if(this.editor && this.editor.isFocused()) document.activeElement.blur();
+    }
+
+    hideFileOpen(){
+        this.setState({
+            showOpenFile: false
+        });
+        if(this.editor) this.editor.focus();
     }
 
     fileNew(){
