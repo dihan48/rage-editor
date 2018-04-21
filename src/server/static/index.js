@@ -33,7 +33,7 @@ class App extends React.Component {
             context: CONTEXT_SERVER,
             tabs: [],
             selectedTab: -1,
-            show: true,
+            show: false,
             showOpenFile: false
         };
         this.onClickAnywhere = this.onClickAnywhere.bind(this);
@@ -172,6 +172,14 @@ class App extends React.Component {
         return (
             <React.Fragment>
                 <Rnd onResize={this.onResize}
+                    default={{
+                        x: (window.innerWidth * 0.3)/2,
+                        y: 50,
+                        width: '70%',
+                        height: 750
+                    }}
+                    minWidth={500}
+                    minHeight={200}
                     dragHandleClassName="#toolbar"
                     cancel=".toolbar-btn"
                     resizeHandleClasses={{
@@ -186,7 +194,8 @@ class App extends React.Component {
                         top: false,
                         topLeft: false,
                         topRight: false
-                    }}>
+                    }}
+                    bounds="#body">
                     <div id="container" style={{visibility: this.state.show ? "visible" : "hidden"}}>
                         <div id="toolbar">
                             <span className="toolbar-btn flt-left" onClick={this.fileNew}>New</span>
