@@ -5,9 +5,123 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import MonacoEditor from 'react-monaco-editor';
 import { Rnd } from 'react-rnd';
+import styled, { css, createGlobalStyle } from 'styled-components';
+
+import { SpacedContainer, Button } from './components/shared.js';
+import OpenFileDialog from './components/OpenFileDialog.js';
 
 const CONTEXT_SERVER = 0;
 const CONTEXT_CLIENT = 1;
+
+const GlobalStyle = createGlobalStyle`
+    html, body {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        font-family: Arial, serif;
+        overflow: hidden;
+        user-select: none;
+    }
+    
+    * {
+        box-sizing: border-box;
+    }
+    
+    .resize {
+        z-index: 2;
+        margin: 10px;
+        background: url(/handle.png) no-repeat;
+    }
+`;
+
+const Container = styled.div`
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #252525;
+    border-radius: 4px;
+    overflow: hidden;
+`;
+const Toolbar = styled(SpacedContainer)`
+    flex: 0 0 35px;
+    z-index: 1;
+    border-bottom: 1px solid #393939;
+    padding: 3px;
+    
+    ${Button} {
+        height: 25px;
+        margin: 2px;
+    }
+`;
+const Tabs = styled.div`
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 1px 8px 0 rgba(0,0,0,0.7);
+    font-size: 0;
+    height: 30px;
+`;
+const Tab = styled.div`
+    display: inline-block;
+    margin: 0;
+    padding: 8px 10px 5px;
+    border-bottom: 1px solid #393939;
+    font-size: 15px;
+    background: #2d2d2d;
+    
+    > span {
+        color: #888888;
+        pointer-events: none;
+        
+        ${props => props.unsaved && css`
+            &:after {
+                content: ' *';
+            }
+        `}
+    }
+    
+    > a {
+        text-decoration: none;
+        color: #e8e8e8;
+        margin-left: 3px;
+    }
+
+    ${props => props.active && css`
+        border-bottom: none;
+        background: #1e1e1e;
+
+        &:not(:first-of-type) {
+            border-left: 1px solid #393939;
+        }
+
+        &:not(:last-of-type) {
+            border-right: 1px solid #393939;
+        }
+
+        > span {
+            color: #e8e8e8;
+        }
+    `}
+`;
+const EditorContainer = styled.div`
+    flex: 1;
+    margin: 0;
+    z-index: 0;
+    overflow: hidden;
+`;
+const StatusBar = styled(SpacedContainer)`
+    flex: 0 0 25px;
+    box-shadow: 0 -1px 8px 0 rgba(0, 0, 0, 0.7);
+    z-index: 1;
+    padding: 0 30px 0 10px;
+    align-items: center;
+    color: #e8e8e8;
+    font-size: 12px;
+`;
 
 class App extends React.Component {
     state = {
@@ -17,23 +131,10 @@ class App extends React.Component {
         context: CONTEXT_SERVER,
         tabs: [],
         selectedTab: -1,
-        show: true,
         showOpenFile: false
     };
 
     componentDidMount(){
-        window.show = () => {
-            this.setState({
-                show: true
-            });
-            if(this.editor) this.editor.focus();
-        };
-        window.hide = () => {
-            this.setState({
-                show: false
-            });
-            if(this.editor && this.editor.isFocused()) document.activeElement.blur();
-        };
         window.onEvalLocalResult = () => {
             this.setStatus(null);
         };
@@ -45,12 +146,10 @@ class App extends React.Component {
         };
 
         document.body.addEventListener('mousedown', this.onClickAnywhere);
-        window.addEventListener('resize', this.onResize);
     }
 
     componentWillUnmount(){
         document.body.removeEventListener('mousedown', this.onClickAnywhere);
-        window.removeEventListener('resize', this.onResize);
     }
 
     onResize = () => {
@@ -58,7 +157,7 @@ class App extends React.Component {
     };
 
     onClickAnywhere = (e) => {
-        if(this.editor && this.state.show){
+        if(this.editor){
             e.preventDefault();
         }
     };
@@ -135,20 +234,26 @@ class App extends React.Component {
 
         // create first tab
         this.fileNew();
+
+        editor.focus();
     };
 
-    showFileOpen = () => {
+    showOpenFile = () => {
+        document.activeElement.blur();
         this.setState({
             showOpenFile: true
         });
-        if(this.editor && this.editor.isFocused()) document.activeElement.blur();
     };
 
-    hideFileOpen = () => {
+    hideOpenFile = () => {
         this.setState({
             showOpenFile: false
         });
         if(this.editor) this.editor.focus();
+    };
+
+    openFile = (file) => {
+
     };
 
     fileNew = () => {
@@ -265,12 +370,12 @@ class App extends React.Component {
                          x: (window.innerWidth * 0.3)/2,
                          y: 50,
                          width: '70%',
-                         height: 750
+                         height: 700
                      }}
                      minWidth={500}
                      minHeight={200}
                      dragHandleClassName="handle"
-                     cancel=".toolbar-btn"
+                     cancel="button"
                      resizeHandleClasses={{
                          bottomRight: "resize"
                      }}
@@ -285,35 +390,33 @@ class App extends React.Component {
                          topRight: false
                      }}
                      bounds="#body">
-                    <div id="container">
-                        <div id="toolbar" className="handle">
+                    <Container>
+                        <Toolbar className="handle">
                             <div>
-                                <span className="toolbar-btn" onClick={this.fileNew}>New</span>
-                                <span className="toolbar-btn" onClick={this.showFileOpen}>Open</span>
-                                <span className="toolbar-btn" data-action="fileSave">Save</span>
-                                <span className="toolbar-btn" data-action="fileSaveAs">Save As</span>
+                                <Button onClick={this.fileNew}>New</Button>
+                                <Button onClick={this.showOpenFile}>Open</Button>
+                                <Button>Save</Button>
+                                <Button>Save As</Button>
                             </div>
                             <div>
-                                <span className="toolbar-btn square" onClick={this.evalLocal} title="Run Locally">L</span>
-                                <span className="toolbar-btn square" onClick={this.evalServer} title="Run on Server">S</span>
-                                <span className="toolbar-btn square" onClick={this.evalClients} title="Run on All Clients">C</span>
-                                <span className="toolbar-btn" onClick={this.onClickContext} title={this.state.context === CONTEXT_CLIENT ? "Use Server-side Context" : "Use Client-side Context"}>{this.state.context === CONTEXT_CLIENT ? "Client-side" : "Server-side"}</span>
+                                <Button square title="Run Locally" onClick={this.evalLocal}>L</Button>
+                                <Button square title="Run on Server" onClick={this.evalServer}>S</Button>
+                                <Button square title="Run on All Clients" onClick={this.evalClients}>C</Button>
+                                <Button title={`Use ${this.state.context === CONTEXT_CLIENT ? 'Server-side' : 'Client-side'} Context`} onClick={this.onClickContext}>{this.state.context === CONTEXT_CLIENT ? "Client-side" : "Server-side"}</Button>
                             </div>
-                        </div>
-                        <div id="tabs">
+                        </Toolbar>
+                        <Tabs>
                             {this.state.tabs.map((tab, idx) => {
-                                const classNames = ['tab'];
                                 const selected = this.state.selectedTab === idx;
-                                if(selected) classNames.push('active');
                                 return (
-                                    <div key={idx} className={classNames.join(' ')} onClick={() => this.selectTab(idx)}>
-                                        <span className="tab-title">{tab.new ? `New ${tab.count}` : 'something'}</span>
-                                        {selected && this.state.tabs.length > 1 && <a href="#" onClick={(e) => {e.stopPropagation(); this.closeTab(idx)}} className="tab-close">&times;</a>}
-                                    </div>
+                                    <Tab key={idx} active={selected} onClick={() => this.selectTab(idx)}>
+                                        <span>{tab.new ? `New ${tab.count}` : 'something'}</span>
+                                        {selected && this.state.tabs.length > 1 && <a href="#" onClick={(e) => {e.preventDefault(); this.closeTab(idx)}}>&times;</a>}
+                                    </Tab>
                                 )
                             })}
-                        </div>
-                        <div id="editor">
+                        </Tabs>
+                        <EditorContainer>
                             <MonacoEditor
                                 language="javascript"
                                 theme="vs-dark"
@@ -326,24 +429,19 @@ class App extends React.Component {
                                     links: false,
                                     scrollBeyondLastLine: false
                                 }} />
-                        </div>
-                        <div id="statusbar">
+                        </EditorContainer>
+                        <StatusBar>
                             <span>Line {this.state.cursorLineNumber}, Column {this.state.cursorColumn}</span>
-                            <span style={{ float: 'right' }}>{this.state.status}</span>
-                        </div>
-                    </div>
+                            <span>{this.state.status}</span>
+                        </StatusBar>
+                        {this.state.showOpenFile && (
+                            <OpenFileDialog
+                                hide={this.hideOpenFile}
+                                onFileSelected={this.openFile}/>
+                        )}
+                    </Container>
                 </Rnd>
-                {this.state.show && this.state.showOpenFile && (
-                    <div id="popup-open" className="popup">
-                        <ul id="openfile-list">
-                            <li><a href="#">script1</a></li>
-                            <li><a href="#">script2</a></li>
-                            <li><a href="#">script3</a></li>
-                        </ul>
-                        <a href="#" className="popup-btn flt-right">Open</a>
-                        <a href="#" className="popup-btn flt-left" onClick={this.hideFileOpen}>Close</a>
-                    </div>
-                )}
+                <GlobalStyle/>
             </React.Fragment>
         );
     }

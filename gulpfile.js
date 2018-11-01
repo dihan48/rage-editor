@@ -3,9 +3,7 @@ const del                   = require('del');
 const webpack               = require('webpack');
 const webpackStream         = require('webpack-stream');
 const merge                 = require('merge-stream');
-const sass                  = require('gulp-sass');
 const rename                = require('gulp-rename');
-const inline                = require('gulp-inline');
 const htmlmin               = require('gulp-htmlmin');
 const MonacoWebpackPlugin   = require('monaco-editor-webpack-plugin');
 
@@ -44,11 +42,7 @@ function buildHTML(mode){
         }, webpack))
         .pipe(gulp.dest(`./dist/packages/${PACKAGE_NAME}/static`));
 
-    const html = gulp.src('./src/server/static/index.html')
-        .pipe(inline({
-            css: () => sass({ outputStyle: prod ? 'compressed' : 'nested' }),
-            disabledTypes: ['js']
-        }));
+    const html = gulp.src('./src/server/static/index.html');
     if(prod) html.pipe(htmlmin({collapseWhitespace: true}));
     html.pipe(gulp.dest(`./dist/packages/${PACKAGE_NAME}/static`));
 
