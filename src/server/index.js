@@ -16,7 +16,7 @@ app.all('/', function(req, res, next) {
 app.use(express.static(path.resolve(__dirname, './static')));
 
 app.listen(config.port, () => {
-    console.log(`RAGE:MP Debugger is listening on port ${config.port}`);
+    console.log(`RAGE Editor is listening on port ${config.port}`);
     tunnel.then((url) => console.log('NGROK URL '+url));
 });
 
@@ -27,7 +27,9 @@ mp.events.add('reditor:requestInit', (player) => {
 mp.events.add('reditor:runServer', (player, code) => {
     try {
         eval(code);
-    }catch(e){}
+    }catch(e){
+        console.error(e);
+    }
     player.call('reditor:runServerRes');
 });
 

@@ -7,6 +7,7 @@ const sass                  = require('gulp-sass');
 const rename                = require('gulp-rename');
 const inline                = require('gulp-inline');
 const htmlmin               = require('gulp-htmlmin');
+const MonacoWebpackPlugin   = require('monaco-editor-webpack-plugin');
 
 const PACKAGE_NAME  = "rage-editor";
 
@@ -16,29 +17,42 @@ function buildHTML(mode){
     const other = gulp.src(['./src/server/static/**/*', '!./src/server/static/index.js', '!./src/server/static/index.scss', '!./src/server/static/index.html'])
         .pipe(gulp.dest(`./dist/packages/${PACKAGE_NAME}/static`));
 
+    const js = gulp.src('./src/server/static/index.js')
+        .pipe(webpackStream({
+            module: {
+                rules: [
+                    {
+                        test: /\.js$/,
+                        use: ['babel-loader']
+                    },
+                    {
+                        test: /\.css$/,
+                        use: ['style-loader', 'css-loader']
+                    }
+                ]
+            },
+            plugins: [
+                new MonacoWebpackPlugin({
+                    output: 'workers',
+                    languages: ['javascript', 'typescript']
+                })
+            ],
+            output: {
+                filename: 'index.js'
+            },
+            mode
+        }, webpack))
+        .pipe(gulp.dest(`./dist/packages/${PACKAGE_NAME}/static`));
+
     const html = gulp.src('./src/server/static/index.html')
         .pipe(inline({
             css: () => sass({ outputStyle: prod ? 'compressed' : 'nested' }),
-            js: () => webpackStream({
-                module: {
-                    rules: [
-                        {
-                            test: /\.js$/,
-                            use: ['babel-loader']
-                        }
-                    ]
-                },
-                plugins: [
-                    new webpack.IgnorePlugin(/vs\/editor\/editor\.main/)
-                ],
-                mode
-            }, webpack),
-            ignore: ['vs/loader.js']
+            disabledTypes: ['js']
         }));
     if(prod) html.pipe(htmlmin({collapseWhitespace: true}));
     html.pipe(gulp.dest(`./dist/packages/${PACKAGE_NAME}/static`));
 
-    return merge(other, html);
+    return merge(other, html, js);
 }
 function buildClient(mode){
     return gulp.src('./src/client/index.js')
