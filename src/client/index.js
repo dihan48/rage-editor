@@ -1,5 +1,4 @@
 let browser;
-let shown = false;
 
 mp.events.add('guiReady', () => {
     mp.events.callRemote('reditor:requestInit');
@@ -10,31 +9,18 @@ mp.events.add('reditor:init', (url) => {
 });
 
 mp.keys.bind(0x77, false, () => {
-    if(shown){
-        browser.execute(`hide();`);
-        mp.gui.cursor.visible = false;
-        mp.events.call('reditor:hidden');
-        shown = false;
-    }else{
-        browser.execute(`show();`);
-        mp.gui.cursor.visible = true;
-        mp.events.call('reditor:shown');
-        shown = true;
+    if(browser){
+        if(browser.active){
+            mp.gui.cursor.visible = false;
+            mp.events.call('reditor:hidden');
+            browser.active = false;
+        }else{
+            mp.gui.cursor.visible = true;
+            mp.events.call('reditor:shown');
+            browser.active = true;
+        }
     }
 });
-
-function resultToExecString(result){
-    switch(typeof result){
-        case 'undefined':
-            result = 'undefined';
-            break;
-        case 'object':
-            result = JSON.stringify(result);
-            break;
-
-    }
-    return result;
-}
 
 mp.events.add('reditor:runLocal', (code) => {
     try {
