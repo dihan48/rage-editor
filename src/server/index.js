@@ -1,6 +1,7 @@
 const path      = require('path');
 const express   = require('express');
 const ngrok     = require('ngrok');
+const rpc       = require('rage-rpc');
 const config    = require('./config.json');
 
 let tunnel = ngrok.connect(config.port);
@@ -20,22 +21,18 @@ app.listen(config.port, () => {
     tunnel.then((url) => console.log('NGROK URL '+url));
 });
 
-mp.events.add('reditor:requestInit', (player) => {
-    tunnel.then((url) => player.call('reditor:init', [url]));
+rpc.register('reditor:getUrl', () => {
+    tunnel.then(url => console.log('RETURNING URL '+url));
+    return tunnel;
 });
 
-mp.events.add('reditor:runServer', (player, code) => {
+rpc.register('reditor:eval', code => {
     try {
         eval(code);
-    }catch(e){
-        console.error(e);
-    }
-    player.call('reditor:runServerRes');
+    }catch(e){}
 });
 
-mp.events.add('reditor:runClients', (player, code) => {
-    mp.players.forEach((player) => {
-        player.call('reditor:runClientsEval', [code]);
-    });
-    player.call('reditor:runClientsRes');
+rpc.register('reditor:evalClients', code => {
+    const queue = mp.players.toArray().map(player => rpc.callClient(player, 'reditor:eval', code));
+    return Promise.all(queue);
 });

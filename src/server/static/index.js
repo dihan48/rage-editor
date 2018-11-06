@@ -10,6 +10,8 @@ import styled, { css, createGlobalStyle } from 'styled-components';
 import { SpacedContainer, Button } from './components/shared.js';
 import OpenFileDialog from './components/OpenFileDialog.js';
 
+const rpc   = require('rage-rpc');
+
 const CONTEXT_SERVER = 0;
 const CONTEXT_CLIENT = 1;
 
@@ -135,16 +137,6 @@ class App extends React.Component {
     };
 
     componentDidMount(){
-        window.onEvalLocalResult = () => {
-            this.setStatus(null);
-        };
-        window.onEvalServerResult = () => {
-            this.setStatus(null);
-        };
-        window.onEvalClientsResult = () => {
-            this.setStatus(null);
-        };
-
         document.body.addEventListener('mousedown', this.onClickAnywhere);
     }
 
@@ -342,24 +334,33 @@ class App extends React.Component {
         if(typeof code !== "string"){
             code = this.state.tabs[this.state.selectedTab].code;
         }
-        if(mp) mp.trigger('reditor:runLocal', code);
+
         this.setStatus('Running Locally...');
+        rpc.callClient('reditor:eval', code).then(() => {
+            this.setStatus(null);
+        });
     };
 
     evalServer = (code) => {
         if(typeof code !== "string"){
             code = this.state.tabs[this.state.selectedTab].code;
         }
-        if(mp) mp.trigger('reditor:runServer', code);
+
         this.setStatus('Running on Server...');
+        rpc.callServer('reditor:eval', code).then(() => {
+            this.setStatus(null);
+        });
     };
 
     evalClients = (code) => {
         if(typeof code !== "string"){
             code = this.state.tabs[this.state.selectedTab].code;
         }
-        if(mp) mp.trigger('reditor:runClients', code);
+
         this.setStatus('Running on All Clients...');
+        rpc.callServer('reditor:evalClients', code).then(() => {
+            this.setStatus(null);
+        });
     };
 
     render(){
