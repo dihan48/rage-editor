@@ -12,7 +12,7 @@ const PACKAGE_NAME  = "rage-editor";
 function buildHTML(mode){
     const prod = mode === 'production';
 
-    const other = gulp.src(['./src/server/static/**/*', '!./src/server/static/index.js', '!./src/server/static/index.scss', '!./src/server/static/index.html'])
+    const other = gulp.src(['./src/server/static/**/*', '!./src/server/static/components/**/*', '!./src/server/static/components', '!./src/server/static/index.js'])
         .pipe(gulp.dest(`./dist/packages/${PACKAGE_NAME}/static`));
 
     const js = gulp.src('./src/server/static/index.js')
@@ -32,11 +32,12 @@ function buildHTML(mode){
                                 "@babel/plugin-proposal-class-properties",
                                 "@babel/plugin-syntax-dynamic-import"
                             ]
-                        }
+                        },
+                        exclude: [/node_modules/]
                     },
                     {
                         test: /\.css$/,
-                        use: ['style-loader', 'css-loader']
+                        use: ['style-loader', 'css-loader'],
                     }
                 ]
             },

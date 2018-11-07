@@ -18,13 +18,9 @@ app.use(express.static(path.resolve(__dirname, './static')));
 
 app.listen(config.port, () => {
     console.log(`RAGE Editor is listening on port ${config.port}`);
-    tunnel.then((url) => console.log('NGROK URL '+url));
 });
 
-rpc.register('reditor:getUrl', () => {
-    tunnel.then(url => console.log('RETURNING URL '+url));
-    return tunnel;
-});
+rpc.register('reditor:getUrl', () => tunnel);
 
 rpc.register('reditor:eval', code => {
     try {
