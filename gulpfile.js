@@ -21,7 +21,18 @@ function buildHTML(mode){
                 rules: [
                     {
                         test: /\.js$/,
-                        use: ['babel-loader']
+                        loader: 'babel-loader',
+                        options: {
+                            presets: [
+                                "@babel/preset-env",
+                                "@babel/preset-react"
+                            ],
+                            plugins: [
+                                "@babel/plugin-proposal-object-rest-spread",
+                                "@babel/plugin-proposal-class-properties",
+                                "@babel/plugin-syntax-dynamic-import"
+                            ]
+                        }
                     },
                     {
                         test: /\.css$/,
