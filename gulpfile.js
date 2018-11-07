@@ -29,6 +29,11 @@ function buildHTML(mode){
                     }
                 ]
             },
+            resolve: {
+                alias: {
+                    'monaco-editor': 'monaco-editor/esm/vs/editor/editor.api.js'
+                }
+            },
             plugins: [
                 new MonacoWebpackPlugin({
                     output: 'workers',
@@ -76,7 +81,7 @@ gulp.task('build:server', () => {
 });
 
 gulp.task('build', gulp.series('clean', gulp.parallel('build:js:client', 'build:html', 'build:server')));
-gulp.task('watch', gulp.series('clean', gulp.parallel('build:js:client:dev', 'build:html:dev', 'build:server', (done) => {
+gulp.task('watch', gulp.series('clean', gulp.parallel('build:js:client:dev', 'build:html:dev', 'build:server', () => {
     // client js
     gulp.watch('./src/client/*.js', gulp.series('build:js:client:dev'));
 
