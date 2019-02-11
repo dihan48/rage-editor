@@ -10,6 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "ngrok": "^3.1.0",
-    "rage-rpc": "0.0.3"
+    "rage-rpc": "file:../../../../PhpStorm/rage-rpc/rage-rpc-0.0.3.tgz"
   }
 }

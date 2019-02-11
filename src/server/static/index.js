@@ -12,6 +12,8 @@ import OpenFileDialog from './components/OpenFileDialog.js';
 
 const rpc   = require('rage-rpc');
 
+window.rrpc = rpc;
+
 const CONTEXT_SERVER = 0;
 const CONTEXT_CLIENT = 1;
 
@@ -447,5 +449,7 @@ class App extends React.Component {
         );
     }
 }
+
+rpc.register('browsertst', () => 'hello');
 
 ReactDOM.render(<App />, document.getElementById('root'));

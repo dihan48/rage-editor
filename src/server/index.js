@@ -5,6 +5,8 @@ const ngrok     = require('ngrok');
 const rpc       = require('rage-rpc');
 const config    = require('./config.json');
 
+global.rrpc = rpc;
+
 http.createServer((req, res) => {
     let filePath = req.url.substr(1);
     if(!filePath) filePath = 'index.html';

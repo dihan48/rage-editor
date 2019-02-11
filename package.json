@@ -8,7 +8,7 @@
         "build:prod": "webpack-cli --env production --progress --colors"
     },
     "repository": {
-    "type": "git",
+        "type": "git",
         "url": "git+https://github.com/micaww/rage-editor.git"
     },
     "author": "micaww",
@@ -36,7 +36,7 @@
     },
     "dependencies": {
         "jquery": "^3.3.1",
-        "rage-rpc": "0.0.3",
+        "rage-rpc": "file:../../PhpStorm/rage-rpc/rage-rpc-0.0.3.tgz",
         "react": "^16.7.0-alpha.0",
         "react-dom": "^16.7.0-alpha.0",
         "react-monaco-editor": "^0.20.0",

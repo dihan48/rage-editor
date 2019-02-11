@@ -2,6 +2,8 @@ const rpc   = require('rage-rpc');
 
 let browser;
 
+global.rrpc = rpc;
+
 mp.events.add('guiReady', () => {
     rpc.callServer('reditor:getUrl').then(url => {
         if(!browser) browser = mp.browsers.new(url);
