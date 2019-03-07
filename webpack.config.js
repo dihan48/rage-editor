@@ -77,11 +77,6 @@ module.exports = env => [
                 }
             ]
         },
-        resolve: {
-            alias: {
-                'monaco-editor': 'monaco-editor/esm/vs/editor/editor.api.js'
-            }
-        },
         plugins: [
             new MonacoWebpackPlugin({
                 output: 'workers',
