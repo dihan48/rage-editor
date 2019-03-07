@@ -19,24 +19,13 @@ http.createServer((req, res) => {
         '.ts': 'text/plain'
     };
 
-    fs.readFile(path.resolve(__dirname, 'static', filePath), (err, data) => {
-        if(err){
-            if(err.code === 'ENOENT'){
-                res.writeHead(404);
-                res.end('Not Found');
-            }else{
-                res.writeHead(500);
-                res.end('Server Error');
-            }
-        }else{
-            res.writeHead(200, {
-                'Content-Type': mimeTypes[extName],
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'X-Requested-With'
-            });
-            res.end(data, 'utf-8');
-        }
+    res.writeHead(200, {
+        'Content-Type': mimeTypes[extName],
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'X-Requested-With'
     });
+
+    fs.createReadStream(path.resolve(__dirname, 'static', filePath)).pipe(res);
 }).listen(config.port);
 
 console.log(`RAGE Editor is listening on port ${config.port}`);
