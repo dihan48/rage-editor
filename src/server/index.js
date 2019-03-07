@@ -30,9 +30,9 @@ http.createServer((req, res) => {
 
 console.log(`RAGE Editor is listening on port ${config.port}`);
 
-let tunnel = ngrok.connect(config.port);
+//let tunnel = ngrok.connect(config.port);
 
-rpc.register('reditor:getUrl', () => tunnel);
+rpc.register('reditor:getUrl', () => `http://localhost:${config.port}`);
 rpc.register('reditor:eval', code => {
     try {
         eval(code);

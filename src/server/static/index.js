@@ -1,6 +1,3 @@
-import '@babel/polyfill';
-
-import $ from 'jquery';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import MonacoEditor from 'react-monaco-editor';
@@ -10,7 +7,7 @@ import styled, { css, createGlobalStyle } from 'styled-components';
 import { SpacedContainer, Button } from './components/shared.js';
 import OpenFileDialog from './components/OpenFileDialog.js';
 
-const rpc   = require('rage-rpc');
+const rpc = require('rage-rpc');
 
 window.rrpc = rpc;
 
@@ -38,7 +35,6 @@ const GlobalStyle = createGlobalStyle`
         background: url(/handle.png) no-repeat;
     }
 `;
-
 const Container = styled.div`
     position: relative;
     display: flex;
@@ -175,8 +171,8 @@ class App extends React.Component {
             noLib: true,
             allowNonTsExtensions: true
         });
-        $.get('defs/lib.es5.d.ts').then((res) => monaco.languages.typescript.javascriptDefaults.addExtraLib(res, 'defs/lib.es5.d.ts'));
-        $.get('defs/base.d.ts').then((res) => monaco.languages.typescript.javascriptDefaults.addExtraLib(res, 'defs/base.d.ts'));
+        fetchFile('/defs/lib.es5.d.ts').then(text => monaco.languages.typescript.javascriptDefaults.addExtraLib(text, 'defs/lib.es5.d.ts'));
+        fetchFile('/defs/base.d.ts').then(text => monaco.languages.typescript.javascriptDefaults.addExtraLib(text, 'defs/base.d.ts'));
     };
 
     editorDidMount = (editor) => {
@@ -301,9 +297,9 @@ class App extends React.Component {
             let data = this.ssDefContent;
             if(typeof data === "undefined"){
                 try {
-                    data = await $.get('http://populumsolus.com/content/defs/rage.php?c=s');
+                    data = await fetchFile('https://raw.githubusercontent.com/CocaColaBear/types-ragemp-s/master/index.d.ts');
                 }catch(e){
-                    data = await $.get('defs/rage-server.d.ts');
+                    data = await fetchFile('defs/rage-server.d.ts');
                 }
             }
             this.ssDefContent = data;
@@ -317,9 +313,9 @@ class App extends React.Component {
             let data = this.csDefContent;
             if(typeof data === "undefined"){
                 try {
-                    data = await $.get('http://populumsolus.com/content/defs/rage.php?c=c');
+                    data = await fetchFile('https://raw.githubusercontent.com/CocaColaBear/types-ragemp-c/master/index.d.ts');
                 }catch(e){
-                    data = await $.get('defs/rage-client.d.ts');
+                    data = await fetchFile('/defs/rage-client.d.ts');
                 }
             }
             this.csDefContent = data;
@@ -450,6 +446,8 @@ class App extends React.Component {
     }
 }
 
-rpc.register('browsertst', () => 'hello');
+function fetchFile(url){
+    return fetch(url).then(res => res.text());
+}
 
 ReactDOM.render(<App />, document.getElementById('root'));
