@@ -3,11 +3,10 @@ import ReactDOM from 'react-dom';
 import MonacoEditor from 'react-monaco-editor';
 import { Rnd } from 'react-rnd';
 import styled, { css, createGlobalStyle } from 'styled-components';
+import * as rpc from 'rage-rpc';
 
 import { SpacedContainer, Button } from './components/shared.js';
 import OpenFileDialog from './components/OpenFileDialog.js';
-
-const rpc = require('rage-rpc');
 
 window.rrpc = rpc;
 
@@ -79,7 +78,7 @@ const Tab = styled.div`
         
         ${props => props.unsaved && css`
             &:after {
-                content: ' *';
+                content: '*';
             }
         `}
     }
@@ -123,6 +122,9 @@ const StatusBar = styled(SpacedContainer)`
     font-size: 12px;
 `;
 
+const defES5 = fetchFile('/defs/lib.es5.d.ts');
+const defBase = fetchFile('/defs/base.d.ts');
+
 class App extends React.Component {
     state = {
         cursorLineNumber: 1,
@@ -142,6 +144,20 @@ class App extends React.Component {
         document.body.removeEventListener('mousedown', this.onClickAnywhere);
     }
 
+    componentDidUpdate(_, prevState){
+        // handle tab changes
+        if(this.editor && (prevState.selectedTab !== this.state.selectedTab || prevState.tabs !== this.state.tabs)){
+            console.log(this.state);
+            const tab = this.state.tabs[this.state.selectedTab];
+            if(tab){
+                this.editor.setModel(tab.model);
+                if(tab.viewState) this.editor.restoreViewState(tab.viewState);
+            }
+            this.editor.focus();
+            this.updateCursorPosition();
+        }
+    }
+
     onResize = () => {
         if(this.editor) this.editor.layout();
     };
@@ -150,14 +166,6 @@ class App extends React.Component {
         if(this.editor){
             e.preventDefault();
         }
-    };
-
-    onEditorChanged = (value) => {
-        this.setState((prevState) => prevState.tabs.map((tab, idx) => {
-            const obj = tab;
-            if(prevState.selectedTab === idx) obj.code = value;
-            return obj;
-        }));
     };
 
     editorWillMount = (monaco) => {
@@ -171,23 +179,15 @@ class App extends React.Component {
             noLib: true,
             allowNonTsExtensions: true
         });
-        fetchFile('/defs/lib.es5.d.ts').then(text => monaco.languages.typescript.javascriptDefaults.addExtraLib(text, 'defs/lib.es5.d.ts'));
-        fetchFile('/defs/base.d.ts').then(text => monaco.languages.typescript.javascriptDefaults.addExtraLib(text, 'defs/base.d.ts'));
+        defES5.then(text => monaco.languages.typescript.javascriptDefaults.addExtraLib(text, 'defs/lib.es5.d.ts'));
+        defBase.then(text => monaco.languages.typescript.javascriptDefaults.addExtraLib(text, 'defs/base.d.ts'));
     };
 
-    editorDidMount = (editor) => {
+    editorDidMount = editor => {
         this.editor = editor;
 
         // line number, column
-        const updateCursorPosition = () => {
-            const pos = editor.getPosition();
-            this.setState({
-                cursorLineNumber: pos.lineNumber,
-                cursorColumn: pos.column
-            });
-        };
-        editor.onDidChangeCursorPosition(updateCursorPosition);
-        updateCursorPosition();
+        editor.onDidChangeCursorPosition(this.updateCursorPosition);
 
         // set default context
         this.setContext(this.state.context);
@@ -199,7 +199,7 @@ class App extends React.Component {
             keybindingContext: null,
             contextMenuGroupId: 'runSelection',
             contextMenuOrder: 0,
-            run: (e) => this.evalLocal(e.getModel().getValueInRange(e.getSelection()))
+            run: e => this.evalLocal(e.getModel().getValueInRange(e.getSelection()))
         });
 
         editor.addAction({
@@ -209,7 +209,7 @@ class App extends React.Component {
             keybindingContext: null,
             contextMenuGroupId: 'runSelection',
             contextMenuOrder: 0,
-            run: (e) => this.evalServer(e.getModel().getValueInRange(e.getSelection()))
+            run: e => this.evalServer(e.getModel().getValueInRange(e.getSelection()))
         });
 
         editor.addAction({
@@ -219,13 +219,22 @@ class App extends React.Component {
             keybindingContext: null,
             contextMenuGroupId: 'runSelection',
             contextMenuOrder: 0,
-            run: (e) => this.evalClients(e.getModel().getValueInRange(e.getSelection()))
+            run: e => this.evalClients(e.getModel().getValueInRange(e.getSelection()))
         });
 
         // create first tab
         this.fileNew();
 
         editor.focus();
+    };
+
+    updateCursorPosition = () => {
+        if(!this.editor) return;
+        const pos = this.editor.getPosition();
+        this.setState({
+            cursorLineNumber: pos.lineNumber,
+            cursorColumn: pos.column
+        });
     };
 
     showOpenFile = () => {
@@ -246,30 +255,44 @@ class App extends React.Component {
 
     };
 
-    fileNew = () => {
-        let count = 1;
-        this.state.tabs.forEach((tab) => {
-            if(tab.new) count++;
-        });
+    newTab = (name, value, isFresh) => {
+        if(!this.monaco) return;
         const newTabs = [...this.state.tabs, {
-            count,
-            new: true,
-            code: ""
+            name,
+            savedValue: isFresh ? null : value,
+            model: this.monaco.editor.createModel(value, 'javascript'),
+            viewState: null,
         }];
-        this.setState({
-            tabs: newTabs
-        });
+        this.setState({ tabs: newTabs });
         this.selectTab(newTabs.length - 1);
     };
 
-    selectTab = (idx) => {
-        this.setState({
-            selectedTab: idx
+    fileNew = () => this.newTab('New', '', true);
+
+    selectTab = idx => {
+        // save current tab state, then set new selectedTab
+        if(!this.editor) return;
+        this.setState(prevState => {
+            const selectedTab = prevState.tabs[prevState.selectedTab];
+            let tabs = prevState.tabs;
+            if(selectedTab){
+                tabs = prevState.tabs.map((tab, curIdx) => {
+                    if(curIdx === prevState.selectedTab) tab.viewState = this.editor.saveViewState();
+                    return tab;
+                });
+            }
+            return {
+                selectedTab: idx,
+                tabs
+            };
         });
     };
 
-    closeTab = (idx) => {
-        this.setState((prevState) => {
+    closeTab = idx => {
+        // close and dispose of current tab, then set new selectedTab
+        this.setState(prevState => {
+            const tab = prevState.tabs[idx];
+            if(tab.model) tab.model.dispose();
             const oldSelected = prevState.selectedTab;
             const newSelected = oldSelected === 0 ? oldSelected : oldSelected - 1;
             const newTabs = [...prevState.tabs];
@@ -281,11 +304,9 @@ class App extends React.Component {
         });
     };
 
-    setStatus = (status) => {
-        this.setState({ status });
-    };
+    setStatus = status => this.setState({ status });
 
-    setContext = async (context) => {
+    setContext = async context => {
         if(!this.monaco) return;
         this.setState({ context });
         if(context === CONTEXT_SERVER){
@@ -328,38 +349,34 @@ class App extends React.Component {
         this.setContext(this.state.context === CONTEXT_CLIENT ? CONTEXT_SERVER : CONTEXT_CLIENT);
     };
 
-    evalLocal = (code) => {
-        if(typeof code !== "string"){
-            code = this.state.tabs[this.state.selectedTab].code;
-        }
+    evalLocal = code => {
+        if(typeof code !== "string") code = this.getCurrentValue();
 
         this.setStatus('Running Locally...');
-        rpc.callClient('reditor:eval', code).then(() => {
+        rpc.callClient('reditor:eval', code).finally(() => {
             this.setStatus(null);
         });
     };
 
-    evalServer = (code) => {
-        if(typeof code !== "string"){
-            code = this.state.tabs[this.state.selectedTab].code;
-        }
+    evalServer = code => {
+        if(typeof code !== "string") code = this.getCurrentValue();
 
         this.setStatus('Running on Server...');
-        rpc.callServer('reditor:eval', code).then(() => {
+        rpc.callServer('reditor:eval', code).finally(() => {
             this.setStatus(null);
         });
     };
 
-    evalClients = (code) => {
-        if(typeof code !== "string"){
-            code = this.state.tabs[this.state.selectedTab].code;
-        }
+    evalClients = code => {
+        if(typeof code !== "string") code = this.getCurrentValue();
 
         this.setStatus('Running on All Clients...');
-        rpc.callServer('reditor:evalClients', code).then(() => {
+        rpc.callServer('reditor:evalClients', code).finally(() => {
             this.setStatus(null);
         });
     };
+
+    getCurrentValue = () => this.state.tabs[this.state.selectedTab].model.getValue();
 
     render(){
         return (
@@ -408,9 +425,26 @@ class App extends React.Component {
                             {this.state.tabs.map((tab, idx) => {
                                 const selected = this.state.selectedTab === idx;
                                 return (
-                                    <Tab key={idx} active={selected} onClick={() => this.selectTab(idx)}>
-                                        <span>{tab.new ? `New ${tab.count}` : 'something'}</span>
-                                        {selected && this.state.tabs.length > 1 && <a href="#" onClick={(e) => {e.preventDefault(); this.closeTab(idx)}}>&times;</a>}
+                                    <Tab
+                                        key={idx}
+                                        active={selected}
+                                        unsaved={!tab.savedValue || tab.savedValue !== tab.model.getValue()}
+                                        onClick={e => {
+                                            e.preventDefault();
+                                            this.selectTab(idx);
+                                        }}>
+                                        <span>{tab.name}</span>
+                                        {selected && this.state.tabs.length > 1 && (
+                                            <a
+                                                href="#"
+                                                onClick={e => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    this.closeTab(idx);
+                                                }}>
+                                                &times;
+                                            </a>
+                                        )}
                                     </Tab>
                                 )
                             })}
@@ -419,14 +453,13 @@ class App extends React.Component {
                             <MonacoEditor
                                 language="javascript"
                                 theme="vs-dark"
-                                value={(this.state.tabs.length && this.state.selectedTab > -1) ? this.state.tabs[this.state.selectedTab].code : ""}
-                                onChange={this.onEditorChanged}
                                 editorWillMount={this.editorWillMount}
                                 editorDidMount={this.editorDidMount}
                                 options={{
                                     fontSize: 16,
                                     links: false,
-                                    scrollBeyondLastLine: false
+                                    scrollBeyondLastLine: false,
+                                    model: null
                                 }} />
                         </EditorContainer>
                         <StatusBar>
