@@ -285,7 +285,18 @@ class App extends React.Component {
 
     onOpenDialogSubmit = name => {
         rpc.callClient('reditor:getFile', name).then(code => {
-            this.newTab(name, code, false);
+            const tab = this.state.tabs[this.state.selectedTab];
+            if(tab.savedValue === null && !tab.model.getValue().length){
+                // this is a blank, unsaved tab. overwrite it.
+                this.updateTab(tab, {
+                    name,
+                    savedValue: code
+                });
+                tab.model.setValue(code);
+            }else{
+                // create a new tab
+                this.newTab(name, code, false);
+            }
             this.hideOpenDialog();
         }).catch(() => {
             alert("Couldn't open file"); // TODO: no alerts pls
@@ -314,6 +325,12 @@ class App extends React.Component {
         this.selectTab(newTabs.length - 1);
     };
 
+    updateTab = (tab, changes) => {
+        this.setState(prevState => ({
+            tabs: prevState.tabs.map(t => t === tab ? { ...t, ...changes } : t)
+        }));
+    };
+
     // save - save the file, overwriting the existing one. and set the tab to reference that file
     // save as - save the file as another name, but dont set the tab to reference that file
     saveTab = (tab, name, shouldSaveAs) => {
@@ -321,15 +338,9 @@ class App extends React.Component {
         const val = tab.model.getValue();
         return rpc.callClient('reditor:saveFile', [name, val]).then(() => {
             if(!shouldSaveAs){
-                this.setState(prevState => {
-                    const tabs = prevState.tabs.map(curTab => {
-                        if(curTab === tab){
-                            curTab.name = name;
-                            curTab.savedValue = val;
-                        }
-                        return curTab;
-                    });
-                    return { tabs };
+                this.updateTab(tab, {
+                    name,
+                    savedValue: val
                 });
             }
             this.setStatus(null);
