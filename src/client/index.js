@@ -4,6 +4,18 @@ const STORAGE_KEY = 'reditorFiles';
 
 let browser;
 
+// hack to get up-to-date chat activated status. damnit GEROGE :(
+function getChatStatus(){
+    return new Promise(res => {
+        const handler = toggle => {
+            res(toggle);
+            mp.events.remove('reditor:chatActivation', handler);
+        };
+        mp.events.add('reditor:chatActivation', handler);
+        mp.gui.execute(`mp.trigger('reditor:chatActivation', chat.active)`);
+    });
+}
+
 mp.events.add('guiReady', () => {
     rpc.callServer('reditor:getUrl').then(url => {
         if(!browser) browser = mp.browsers.new(url);
@@ -11,15 +23,19 @@ mp.events.add('guiReady', () => {
     });
 });
 
+let lastChatActivation;
 mp.keys.bind(0x77, false, () => {
     if(browser){
         if(browser.active){
             mp.gui.cursor.visible = false;
             mp.events.call('reditor:hidden');
+            lastChatActivation.then(t => mp.gui.chat.activate(t));
             browser.active = false;
         }else{
-            mp.gui.cursor.visible = true;
             mp.events.call('reditor:shown');
+            lastChatActivation = getChatStatus();
+            mp.gui.cursor.visible = true;
+            lastChatActivation.then(() => mp.gui.chat.activate(false));
             browser.active = true;
             focusEditor();
         }
