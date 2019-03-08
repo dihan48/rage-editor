@@ -1,8 +1,8 @@
-const rpc   = require('rage-rpc');
+import * as rpc from 'rage-rpc';
+
+const STORAGE_KEY = 'reditorFiles';
 
 let browser;
-
-global.rrpc = rpc;
 
 mp.events.add('guiReady', () => {
     rpc.callServer('reditor:getUrl').then(url => {
@@ -21,12 +21,31 @@ mp.keys.bind(0x77, false, () => {
             mp.gui.cursor.visible = true;
             mp.events.call('reditor:shown');
             browser.active = true;
+            focusEditor();
         }
     }
 });
 
-rpc.register('reditor:eval', (code) => {
+function focusEditor(){
+    if(browser && browser.active){
+        browser.execute(`if(reditor && reditor.editor) reditor.editor.focus()`);
+    }
+}
+
+rpc.register('reditor:eval', code => {
     try {
         eval(code);
     }catch(e){}
+});
+
+rpc.register('reditor:getFiles', () => {
+    const names = Object.keys(mp.storage.data[STORAGE_KEY] || {});
+    return names.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+});
+rpc.register('reditor:getFile', name => (mp.storage.data[STORAGE_KEY] || {})[name]);
+rpc.register('reditor:exists', name => typeof (mp.storage.data[STORAGE_KEY] || {})[name] !== 'undefined');
+rpc.register('reditor:saveFile', ([name, code]) => {
+    if(!mp.storage.data[STORAGE_KEY]) mp.storage.data[STORAGE_KEY] = {};
+    mp.storage.data[STORAGE_KEY][name] = code;
+    mp.storage.flush();
 });

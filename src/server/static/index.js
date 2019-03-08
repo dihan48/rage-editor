@@ -6,9 +6,8 @@ import styled, { css, createGlobalStyle } from 'styled-components';
 import * as rpc from 'rage-rpc';
 
 import { SpacedContainer, Button } from './components/shared.js';
-import OpenFileDialog from './components/OpenFileDialog.js';
-
-window.rrpc = rpc;
+import OpenDialog from './components/OpenDialog.js';
+import SaveDialog from './components/SaveDialog.js';
 
 const CONTEXT_SERVER = 0;
 const CONTEXT_CLIENT = 1;
@@ -133,21 +132,23 @@ class App extends React.Component {
         context: CONTEXT_SERVER,
         tabs: [],
         selectedTab: -1,
-        showOpenFile: false
+        showOpenDialog: false,
+        showSaveDialog: false,
+        showSaveAsDialog: false
     };
+    containerRef = React.createRef();
 
     componentDidMount(){
-        document.body.addEventListener('mousedown', this.onClickAnywhere);
+        this.containerRef.current.addEventListener('click', this.onContainerClick);
     }
 
     componentWillUnmount(){
-        document.body.removeEventListener('mousedown', this.onClickAnywhere);
+        this.containerRef.current.removeEventListener('click', this.onContainerClick);
     }
 
     componentDidUpdate(_, prevState){
         // handle tab changes
         if(this.editor && (prevState.selectedTab !== this.state.selectedTab || prevState.tabs !== this.state.tabs)){
-            console.log(this.state);
             const tab = this.state.tabs[this.state.selectedTab];
             if(tab){
                 this.editor.setModel(tab.model);
@@ -156,16 +157,15 @@ class App extends React.Component {
             this.editor.focus();
             this.updateCursorPosition();
         }
+        console.log(this.state);
     }
+
+    onContainerClick = () => {
+        if(!this.state.showOpenDialog && !this.state.showSaveDialog && !this.state.showSaveAsDialog) this.focus();
+    };
 
     onResize = () => {
         if(this.editor) this.editor.layout();
-    };
-
-    onClickAnywhere = (e) => {
-        if(this.editor){
-            e.preventDefault();
-        }
     };
 
     editorWillMount = (monaco) => {
@@ -201,7 +201,6 @@ class App extends React.Component {
             contextMenuOrder: 0,
             run: e => this.evalLocal(e.getModel().getValueInRange(e.getSelection()))
         });
-
         editor.addAction({
             id: 'runSelectionServer',
             label: 'Run Selection on Server',
@@ -211,7 +210,6 @@ class App extends React.Component {
             contextMenuOrder: 0,
             run: e => this.evalServer(e.getModel().getValueInRange(e.getSelection()))
         });
-
         editor.addAction({
             id: 'runSelectionAllClients',
             label: 'Run Selection on All Clients',
@@ -237,22 +235,71 @@ class App extends React.Component {
         });
     };
 
-    showOpenFile = () => {
+    showOpenDialog = () => {
         document.activeElement.blur();
         this.setState({
-            showOpenFile: true
+            showOpenDialog: true
         });
     };
-
-    hideOpenFile = () => {
+    hideOpenDialog = () => {
         this.setState({
-            showOpenFile: false
+            showOpenDialog: false
+        });
+        if(this.editor) this.editor.focus();
+    };
+    showSaveDialog = () => {
+        document.activeElement.blur();
+        this.setState({
+            showSaveDialog: true
+        });
+    };
+    hideSaveDialog = () => {
+        this.setState({
+            showSaveDialog: false
+        });
+        if(this.editor) this.editor.focus();
+    };
+    showSaveAsDialog = () => {
+        document.activeElement.blur();
+        this.setState({
+            showSaveAsDialog: true
+        });
+    };
+    hideSaveAsDialog = () => {
+        this.setState({
+            showSaveAsDialog: false
         });
         if(this.editor) this.editor.focus();
     };
 
-    openFile = (file) => {
+    onClickSave = () => {
+        const tab = this.state.tabs[this.state.selectedTab];
+        if(tab.savedValue === null){
+            // new file: we need a name
+            this.showSaveDialog();
+        }else{
+            // existing file: overwrite
+            this.saveTab(tab, tab.name, false);
+        }
+    };
 
+    onOpenDialogSubmit = name => {
+        rpc.callClient('reditor:getFile', name).then(code => {
+            this.newTab(name, code, false);
+            this.hideOpenDialog();
+        }).catch(() => {
+            alert("Couldn't open file"); // TODO: no alerts pls
+        });
+    };
+
+    onSaveDialogSubmit = (name, shouldSaveAs) => {
+        if(!name.length) return;
+        rpc.callClient('reditor:exists', name).then(exists => {
+            if(exists) return alert("This file already exists"); // TODO: no alerts pls
+            this.saveTab(this.state.tabs[this.state.selectedTab], name, shouldSaveAs).then(() => {
+                this.hideSaveDialog();
+            });
+        });
     };
 
     newTab = (name, value, isFresh) => {
@@ -265,6 +312,30 @@ class App extends React.Component {
         }];
         this.setState({ tabs: newTabs });
         this.selectTab(newTabs.length - 1);
+    };
+
+    // save - save the file, overwriting the existing one. and set the tab to reference that file
+    // save as - save the file as another name, but dont set the tab to reference that file
+    saveTab = (tab, name, shouldSaveAs) => {
+        this.setStatus('Saving...');
+        const val = tab.model.getValue();
+        return rpc.callClient('reditor:saveFile', [name, val]).then(() => {
+            if(!shouldSaveAs){
+                this.setState(prevState => {
+                    const tabs = prevState.tabs.map(curTab => {
+                        if(curTab === tab){
+                            curTab.name = name;
+                            curTab.savedValue = val;
+                        }
+                        return curTab;
+                    });
+                    return { tabs };
+                });
+            }
+            this.setStatus(null);
+        }).catch(() => {
+            alert("Couldn't save file"); // TODO: no alerts pls
+        });
     };
 
     fileNew = () => this.newTab('New', '', true);
@@ -378,6 +449,8 @@ class App extends React.Component {
 
     getCurrentValue = () => this.state.tabs[this.state.selectedTab].model.getValue();
 
+    focus = () => this.editor && !this.editor.hasTextFocus() && this.editor.focus();
+
     render(){
         return (
             <React.Fragment>
@@ -406,13 +479,13 @@ class App extends React.Component {
                          topRight: false
                      }}
                      bounds="#body">
-                    <Container>
+                    <Container ref={this.containerRef}>
                         <Toolbar className="handle">
                             <div>
                                 <Button onClick={this.fileNew}>New</Button>
-                                <Button onClick={this.showOpenFile}>Open</Button>
-                                <Button>Save</Button>
-                                <Button>Save As</Button>
+                                <Button onClick={this.showOpenDialog}>Open</Button>
+                                <Button onClick={this.onClickSave}>Save</Button>
+                                <Button onClick={this.showSaveAsDialog}>Save As</Button>
                             </div>
                             <div>
                                 <Button square title="Run Locally" onClick={this.evalLocal}>L</Button>
@@ -466,10 +539,21 @@ class App extends React.Component {
                             <span>Line {this.state.cursorLineNumber}, Column {this.state.cursorColumn}</span>
                             <span>{this.state.status}</span>
                         </StatusBar>
-                        {this.state.showOpenFile && (
-                            <OpenFileDialog
-                                hide={this.hideOpenFile}
-                                onFileSelected={this.openFile}/>
+                        {this.state.showOpenDialog && (
+                            <OpenDialog
+                                tabs={this.state.tabs}
+                                hide={this.hideOpenDialog}
+                                onFileSelected={this.onOpenDialogSubmit}/>
+                        )}
+                        {this.state.showSaveDialog && (
+                            <SaveDialog
+                                hide={this.hideSaveDialog}
+                                onSubmit={name => this.onSaveDialogSubmit(name, false)}/>
+                        )}
+                        {this.state.showSaveAsDialog && (
+                            <SaveDialog
+                                hide={this.hideSaveAsDialog}
+                                onSubmit={name => this.onSaveDialogSubmit(name, true)}/>
                         )}
                     </Container>
                 </Rnd>
@@ -483,4 +567,4 @@ function fetchFile(url){
     return fetch(url).then(res => res.text());
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+window.reditor = ReactDOM.render(<App />, document.getElementById('root'));

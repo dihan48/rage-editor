@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
+import * as rpc from 'rage-rpc';
 
 import { Button, SpacedContainer } from './shared.js';
 
@@ -54,7 +55,7 @@ const StyledButton = styled(Button)`
     padding: 5px 10px;
 `;
 
-export default function OpenFileDialog({ hide, onFileSelected }){
+export default function OpenDialog({ hide, onFileSelected, tabs }){
     const [files, setFiles] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
 
@@ -65,21 +66,17 @@ export default function OpenFileDialog({ hide, onFileSelected }){
     }
 
     useEffect(() => {
-        const files = [
-            "script1",
-            "script2",
-            "script3",
-            "script4"
-        ];
-        setFiles(files);
-        setSelectedFile(files[0]);
+        rpc.callClient('reditor:getFiles').then(files => {
+            setFiles(files);
+            setSelectedFile(files[0]);
+        });
     }, []);
 
     return (
         <Backdrop onClick={onBackdropClick}>
             <Dialog>
                 <List>
-                    {files.map(file => (
+                    {files.filter(name => !tabs.find(t => t.name === name)).map(file => (
                         <ListItem
                             key={file}
                             active={selectedFile === file}

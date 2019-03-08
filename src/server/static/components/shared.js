@@ -26,6 +26,10 @@ export const Button = styled.button`
     &:active {
         background-color: rgba(88, 88, 88, 0.7);
     }
+    
+    &:focus {
+        outline: none;
+    }
 
     ${props => props.square && css`
         width: 25px;
