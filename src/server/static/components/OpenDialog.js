@@ -55,42 +55,58 @@ const StyledButton = styled(Button)`
     padding: 5px 10px;
 `;
 
-export default function OpenDialog({ hide, onFileSelected, tabs }){
-    const [files, setFiles] = useState([]);
-    const [selectedFile, setSelectedFile] = useState(null);
+export default class OpenDialog extends React.Component {
+    state = {
+        files: null,
+        selectedFile: null
+    };
 
-    function onBackdropClick(e){
-        if(e.target === e.currentTarget){
-            hide();
-        }
+    componentDidMount(){
+        rpc.callClient('reditor:getFiles').then(files => {
+            this.setState({
+                files,
+                selectedFile: files[0]
+            });
+        });
     }
 
-    useEffect(() => {
-        rpc.callClient('reditor:getFiles').then(files => {
-            setFiles(files);
-            setSelectedFile(files[0]);
-        });
-    }, []);
+    onBackdropClick = e => {
+        if(e.target === e.currentTarget) this.props.hide();
+    };
 
-    return (
-        <Backdrop onClick={onBackdropClick}>
-            <Dialog>
-                <List>
-                    {files.filter(name => !tabs.find(t => t.name === name)).map(file => (
-                        <ListItem
-                            key={file}
-                            active={selectedFile === file}
-                            onClick={() => setSelectedFile(file)}
-                        >{file}</ListItem>
-                    ))}
-                </List>
-                <SpacedContainer>
-                    <StyledButton onClick={hide}>Close</StyledButton>
-                    <StyledButton onClick={() => onFileSelected(selectedFile)}>Open</StyledButton>
-                </SpacedContainer>
-            </Dialog>
-        </Backdrop>
-    );
+    onFileClick = file => {
+        this.setState(prevState => {
+            if(prevState.selectedFile === file) this.props.onFileSelected(file);
+            else return { selectedFile: file };
+            return {};
+        });
+    };
+
+    open = () => this.props.onFileSelected(this.state.selectedFile);
+
+    render(){
+        return (
+            <Backdrop onClick={this.onBackdropClick}>
+                {!!this.state.files && (
+                    <Dialog>
+                        <List>
+                            {this.state.files.filter(name => !this.props.tabs.find(t => t.name === name)).map(file => (
+                                <ListItem
+                                    key={file}
+                                    active={this.state.selectedFile === file}
+                                    onClick={() => this.onFileClick(file)}
+                                >{file}</ListItem>
+                            ))}
+                        </List>
+                        <SpacedContainer>
+                            <StyledButton onClick={this.props.hide}>Close</StyledButton>
+                            <StyledButton onClick={this.open}>Open</StyledButton>
+                        </SpacedContainer>
+                    </Dialog>
+                )}
+            </Backdrop>
+        );
+    }
 }
 
 function ListItem({ children, active, onClick }){
