@@ -23,7 +23,7 @@ const Dialog = styled.div`
     padding: 10px;
     color: #ffffff;
     box-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.3);
-    width: 250px;
+    width: 280px;
 `;
 const List = styled.ul`
     background: #111111;
@@ -82,6 +82,21 @@ export default class OpenDialog extends React.Component {
         });
     };
 
+    delete = () => {
+        if(!this.state.selectedFile) return;
+        rpc.callClient('reditor:deleteFile', this.state.selectedFile).then(() => {
+            this.setState(prevState => {
+                const newFiles = prevState.files.filter(f => f !== this.state.selectedFile);
+                return {
+                    files: newFiles,
+                    selectedFile: newFiles[0]
+                };
+            });
+        }).catch(() => {
+            alert("Couldn't delete file"); // TODO: no alerts pls
+        })
+    };
+
     open = () => this.props.onFileSelected(this.state.selectedFile);
 
     render(){
@@ -99,7 +114,10 @@ export default class OpenDialog extends React.Component {
                             ))}
                         </List>
                         <SpacedContainer>
-                            <StyledButton onClick={this.props.hide}>Close</StyledButton>
+                            <div>
+                                <StyledButton onClick={this.props.hide}>Close</StyledButton>
+                                <StyledButton onClick={this.delete} marginLeft={6}>Delete</StyledButton>
+                            </div>
                             <StyledButton onClick={this.open}>Open</StyledButton>
                         </SpacedContainer>
                     </Dialog>

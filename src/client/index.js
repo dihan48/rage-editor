@@ -65,3 +65,9 @@ rpc.register('reditor:saveFile', ([name, code]) => {
     mp.storage.data[STORAGE_KEY][name] = code;
     mp.storage.flush();
 });
+rpc.register('reditor:deleteFile', name => {
+    if(mp.storage.data[STORAGE_KEY]){
+        delete mp.storage.data[STORAGE_KEY][name];
+        mp.storage.flush();
+    }
+});
