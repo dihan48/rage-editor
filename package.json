@@ -1,7 +1,7 @@
 {
     "name": "rage-editor",
-    "version": "1.0.0",
-    "description": "In-game code editor and tester for RAGE:MP",
+    "version": "0.1.0",
+    "description": "In-game JavaScript editor and tester for RAGE:MP",
     "main": "index.js",
     "scripts": {
         "watch": "webpack-cli --env development --progress --colors --watch",
@@ -29,7 +29,7 @@
         "babel-loader": "^8.0.5",
         "clean-webpack-plugin": "^2.0.0",
         "copy-webpack-plugin": "^5.0.0",
-        "css-loader": "^2.1.0",
+        "css-loader": "^2.1.1",
         "del-webpack-plugin": "^1.2.0",
         "html-webpack-plugin": "^3.2.0",
         "monaco-editor-webpack-plugin": "^1.7.0",
