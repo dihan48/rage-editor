@@ -63,9 +63,10 @@ export default class OpenDialog extends React.Component {
 
     componentDidMount(){
         rpc.callClient('reditor:getFiles').then(files => {
+            const newFiles = files.filter(name => !this.props.tabs.find(t => t.name === name));
             this.setState({
-                files,
-                selectedFile: files[0]
+                files: newFiles,
+                selectedFile: newFiles[0]
             });
         });
     }
@@ -105,7 +106,7 @@ export default class OpenDialog extends React.Component {
                 {!!this.state.files && (
                     <Dialog>
                         <List>
-                            {this.state.files.filter(name => !this.props.tabs.find(t => t.name === name)).map(file => (
+                            {this.state.files.map(file => (
                                 <ListItem
                                     key={file}
                                     active={this.state.selectedFile === file}
