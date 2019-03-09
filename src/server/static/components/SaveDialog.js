@@ -68,7 +68,7 @@ export default function SaveDialog({ hide, onSubmit }){
                     autoFocus/>
                 <SpacedContainer>
                     <StyledButton onClick={hide}>Close</StyledButton>
-                    <StyledButton onClick={() => onSubmit(name)}>Save</StyledButton>
+                    <StyledButton onClick={() => onSubmit(name)} disabled={!name.length}>Save</StyledButton>
                 </SpacedContainer>
             </Dialog>
         </Backdrop>

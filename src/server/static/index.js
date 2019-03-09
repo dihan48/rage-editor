@@ -512,7 +512,7 @@ class App extends React.Component {
                                     <Tab
                                         key={idx}
                                         active={selected}
-                                        unsaved={!tab.savedValue || tab.savedValue !== tab.model.getValue()}
+                                        unsaved={tab.savedValue === null || tab.savedValue !== tab.model.getValue()}
                                         onClick={e => {
                                             e.preventDefault();
                                             this.selectTab(idx);
