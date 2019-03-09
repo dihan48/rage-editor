@@ -4,6 +4,9 @@ const http      = require('http');
 const ngrok     = require('ngrok');
 const rpc       = require('rage-rpc');
 const config    = require('./config.json');
+const util      = require('./util.js');
+
+const url = config.useNgrok ? ngrok.connect(config.port) : util.getIpAddress().then(ip => `http://${ip}:${config.port}`);
 
 http.createServer((req, res) => {
     let filePath = req.url.substr(1);
@@ -28,9 +31,10 @@ http.createServer((req, res) => {
 
 console.log(`RAGE Editor is listening on port ${config.port}`);
 
-//let tunnel = ngrok.connect(config.port);
-
-rpc.register('reditor:getUrl', () => `http://localhost:${config.port}`);
+rpc.register('reditor:getUrl', (_, { player }) => {
+    if(player.ip === '127.0.0.1') return `http://localhost:${config.port}`;
+    return url;
+});
 rpc.register('reditor:eval', code => {
     try {
         eval(code);

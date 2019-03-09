@@ -121,8 +121,8 @@ const StatusBar = styled(SpacedContainer)`
     font-size: 12px;
 `;
 
-const defES5 = fetchFile('/defs/lib.es5.d.ts');
-const defBase = fetchFile('/defs/base.d.ts');
+const defES5 = fetchFile('defs/lib.es5.d.ts');
+const defBase = fetchFile('defs/base.d.ts');
 
 class App extends React.Component {
     state = {
