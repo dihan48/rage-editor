@@ -309,6 +309,7 @@ class App extends React.Component {
             if(exists) return alert("This file already exists"); // TODO: no alerts pls
             this.saveTab(this.state.tabs[this.state.selectedTab], name, shouldSaveAs).then(() => {
                 this.hideSaveDialog();
+                this.hideSaveAsDialog();
             });
         });
     };
