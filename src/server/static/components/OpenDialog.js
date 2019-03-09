@@ -95,10 +95,10 @@ export default class OpenDialog extends React.Component {
             });
         }).catch(() => {
             alert("Couldn't delete file"); // TODO: no alerts pls
-        })
+        });
     };
 
-    open = () => this.props.onFileSelected(this.state.selectedFile);
+    open = () => this.state.selectedFile && this.props.onFileSelected(this.state.selectedFile);
 
     render(){
         return (
@@ -117,9 +117,9 @@ export default class OpenDialog extends React.Component {
                         <SpacedContainer>
                             <div>
                                 <StyledButton onClick={this.props.hide}>Close</StyledButton>
-                                <StyledButton onClick={this.delete} marginLeft={6}>Delete</StyledButton>
+                                <StyledButton disabled={!this.state.selectedFile} onClick={this.delete} marginLeft={6}>Delete</StyledButton>
                             </div>
-                            <StyledButton onClick={this.open}>Open</StyledButton>
+                            <StyledButton disabled={!this.state.selectedFile} onClick={this.open}>Open</StyledButton>
                         </SpacedContainer>
                     </Dialog>
                 )}

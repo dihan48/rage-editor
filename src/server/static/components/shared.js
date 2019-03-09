@@ -19,7 +19,7 @@ export const Button = styled.button`
     background: transparent;
     margin-left: ${props => props.marginLeft || 0}px;
 
-    &:hover {
+    &:hover:not(:disabled) {
         background-color: #585858;
         border-color: #909090;
     }
@@ -31,7 +31,11 @@ export const Button = styled.button`
     &:focus {
         outline: none;
     }
-
+    
+    &:disabled {
+        opacity: 0.4;
+    }
+    
     ${props => props.square && css`
         width: 25px;
     `}
