@@ -33,7 +33,8 @@ module.exports = env => [
                 from: '**/*',
                 to: './',
                 ignore: [
-                    './index.js',
+                    'index.js',
+                    'util.js',
                     'static/**/*.js'
                 ]
             }])
