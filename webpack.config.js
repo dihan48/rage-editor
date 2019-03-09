@@ -5,6 +5,8 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const PACKAGE_NAME = 'rage-editor';
 
+const removeTypescriptReferences = content => content.toString().replace(/^\/\/\/\s<reference.*$/gm, '');
+
 module.exports = env => [
     {
         entry: './src/client/index.js',
@@ -82,7 +84,25 @@ module.exports = env => [
                 output: 'workers',
                 languages: ['javascript', 'typescript'],
                 features: []
-            })
+            }),
+            new CopyWebpackPlugin([{
+                from: 'node_modules/@types/ragemp-c/index.d.ts',
+                to: 'defs/rage-client.d.ts',
+                transform: content => {
+                    return  "// Generated local backup copy of CocaColaBear's client-side TypeScript definitions\n" +
+                            "// https://github.com/CocaColaBear/types-ragemp-c" +
+                            removeTypescriptReferences(content);
+                }
+            }]),
+            new CopyWebpackPlugin([{
+                from: 'node_modules/@types/ragemp-s/index.d.ts',
+                to: 'defs/rage-server.d.ts',
+                transform: content => {
+                    return  "// Generated local backup copy of CocaColaBear's server-side TypeScript definitions\n" +
+                            "// https://github.com/CocaColaBear/types-ragemp-s" +
+                            removeTypescriptReferences(content);
+                }
+            }]),
         ],
         output: {
             path: path.resolve('dist', 'packages', PACKAGE_NAME, 'static'),
