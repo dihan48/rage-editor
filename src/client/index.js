@@ -58,7 +58,13 @@ rpc.register('reditor:getFiles', () => {
     const names = Object.keys(mp.storage.data[STORAGE_KEY] || {});
     return names.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 });
-rpc.register('reditor:getFile', name => (mp.storage.data[STORAGE_KEY] || {})[name]);
+rpc.register('reditor:getFile', name => {
+    const code = (mp.storage.data[STORAGE_KEY] || {})[name];
+    return code.replace(/[\n]/g, "\\n")
+        .replace(/[\r]/g, "\\r")
+        .replace(/[\t]/g, "\\t")
+        .replace(/[\b]/g, "\\b");
+});
 rpc.register('reditor:exists', name => typeof (mp.storage.data[STORAGE_KEY] || {})[name] !== 'undefined');
 rpc.register('reditor:saveFile', ([name, code]) => {
     if(!mp.storage.data[STORAGE_KEY]) mp.storage.data[STORAGE_KEY] = {};

@@ -8,6 +8,8 @@ const util      = require('./util.js');
 
 const url = config.useNgrok ? ngrok.connect(config.port) : util.getIpAddress().then(ip => `http://${ip}:${config.port}`);
 
+mp.events.add('log', (_, a) => console.log(a));
+
 http.createServer((req, res) => {
     let filePath = req.url.substr(1);
     if(!filePath) filePath = 'index.html';
