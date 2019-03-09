@@ -16,10 +16,18 @@ function getChatStatus(){
     });
 }
 
+function init(info){
+    // set up browser
+    if(!browser) browser = mp.browsers.new(info.url);
+    browser.active = false;
+
+    // set up key bind
+    mp.keys.bind(info.key, false, onBindPress);
+}
+
 mp.events.add('guiReady', () => {
-    rpc.callServer('reditor:getUrl').then(url => {
-        if(!browser) browser = mp.browsers.new(url);
-        browser.active = false;
+    rpc.callServer('reditor:getInfo').then(info => {
+        if(info) init(info);
     });
 });
 
@@ -41,10 +49,6 @@ function onBindPress(){
         }
     }
 }
-
-rpc.callServer('reditor:getConfig').then(config => {
-    mp.keys.bind(config.key, false, onBindPress);
-});
 
 function focusEditor(){
     if(browser && browser.active){

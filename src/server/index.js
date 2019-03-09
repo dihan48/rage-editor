@@ -33,13 +33,13 @@ http.createServer((req, res) => {
 
 console.log(`RAGE Editor is listening on port ${config.port}`);
 
-rpc.register('reditor:getConfig', () => ({
-    key: config.key
+rpc.register('reditor:getInfo', (_, { player }) => url.then(url => {
+    if(Array.isArray(config.whitelistIPs) && config.whitelistIPs.length && !config.whitelistIPs.includes(player.ip)) return;
+    return {
+        url: player.ip === '127.0.0.1' ? `http://localhost:${config.port}` : url,
+        key: config.key
+    };
 }));
-rpc.register('reditor:getUrl', (_, { player }) => {
-    if(player.ip === '127.0.0.1') return `http://localhost:${config.port}`;
-    return url;
-});
 rpc.register('reditor:eval', code => {
     try {
         eval(code);
