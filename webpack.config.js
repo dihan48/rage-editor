@@ -2,6 +2,8 @@ const path = require('path');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const DelWebpackPlugin = require('del-webpack-plugin');
 
 const PACKAGE_NAME = 'rage-editor';
 
@@ -28,16 +30,11 @@ module.exports = env => [
         },
         plugins: [
             new CleanWebpackPlugin(),
-            new CopyWebpackPlugin([{
-                context: 'src/server',
-                from: '**/*',
-                to: './',
-                ignore: [
-                    'index.js',
-                    'util.js',
-                    'static/**/*.js'
-                ]
-            }])
+            new CopyWebpackPlugin([
+                { context: 'src/server', from: 'static/**/*', to: './', ignore: ['*.js'] },
+                { from: 'src/server/node_modules', to: 'node_modules' },
+                { from: 'src/server/config.json', to: './' }
+            ])
         ],
         externals: function(ctx, req, callback){
             if(req === 'ngrok' || req === './config.json') callback(null, 'commonjs ' + req);
@@ -86,6 +83,34 @@ module.exports = env => [
                 languages: ['javascript', 'typescript'],
                 features: []
             }),
+            new HtmlWebpackPlugin({
+                inject: false,
+                cache: false,
+                filename: path.resolve('dist', 'packages', PACKAGE_NAME, 'static', `index.html`),
+                minify: {
+                    collapseWhitespace: true,
+                    removeComments: true,
+                    removeRedundantAttributes: true,
+                    removeScriptTypeAttributes: true,
+                    removeStyleLinkTypeAttributes: true,
+                    useShortDoctype: true
+                },
+                templateContent: htmlWebpackData => `
+                    <!DOCTYPE html>
+                    <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <title>RAGE:MP Debugger</title>
+                        </head>
+                        <body>
+                            <div id="root"></div>
+                            <script type="text/javascript">
+                                ${htmlWebpackData.compilation.assets[htmlWebpackData.htmlWebpackPlugin.files.js[0].substr(htmlWebpackData.htmlWebpackPlugin.files.publicPath.length)].source()}
+                            </script>
+                        </body>
+                    </html>
+                `
+            }),
             new CopyWebpackPlugin([{
                 from: 'node_modules/@types/ragemp-c/index.d.ts',
                 to: 'defs/rage-client.d.ts',
@@ -104,6 +129,10 @@ module.exports = env => [
                             removeTypescriptReferences(content);
                 }
             }]),
+            new DelWebpackPlugin({
+                include: ['index.js'],
+                keepGeneratedAssets: false
+            })
         ],
         output: {
             path: path.resolve('dist', 'packages', PACKAGE_NAME, 'static'),
