@@ -33,6 +33,9 @@ http.createServer((req, res) => {
 
 console.log(`RAGE Editor is listening on port ${config.port}`);
 
+rpc.register('reditor:getConfig', () => ({
+    key: config.key
+}));
 rpc.register('reditor:getUrl', (_, { player }) => {
     if(player.ip === '127.0.0.1') return `http://localhost:${config.port}`;
     return url;

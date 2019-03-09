@@ -24,7 +24,7 @@ mp.events.add('guiReady', () => {
 });
 
 let lastChatActivation;
-mp.keys.bind(0x77, false, () => {
+function onBindPress(){
     if(browser){
         if(browser.active){
             mp.gui.cursor.visible = false;
@@ -40,6 +40,10 @@ mp.keys.bind(0x77, false, () => {
             focusEditor();
         }
     }
+}
+
+rpc.callServer('reditor:getConfig').then(config => {
+    mp.keys.bind(config.key, false, onBindPress);
 });
 
 function focusEditor(){
