@@ -1,6 +1,6 @@
 {
     "key": 119,
     "port": 8083,
-    "whitelistIPs": ["127.0.0.1"],
+    "whitelistIPs": [],
     "useNgrok": true
 }

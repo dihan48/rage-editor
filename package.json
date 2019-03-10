@@ -38,10 +38,10 @@
         "webpack-cli": "^3.2.3"
     },
     "dependencies": {
-        "@types/ragemp-c": "github:CocaColaBear/types-ragemp-c#master",
-        "@types/ragemp-s": "github:CocaColaBear/types-ragemp-s#master",
+        "@types/ragemp-c": "github:CocaColaBear/types-ragemp-c",
+        "@types/ragemp-s": "github:CocaColaBear/types-ragemp-s",
         "globby": "^9.1.0",
-        "rage-rpc": "^0.2.0",
+        "rage-rpc": "^0.2.1",
         "react": "^16.8.4",
         "react-dom": "^16.8.4",
         "react-monaco-editor": "^0.25.1",
