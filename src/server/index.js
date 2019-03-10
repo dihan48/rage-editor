@@ -8,8 +8,6 @@ const util      = require('./util.js');
 
 const url = config.useNgrok ? ngrok.connect(config.port) : util.getIpAddress().then(ip => `http://${ip}:${config.port}`);
 
-mp.events.add('log', (_, a) => console.log(a));
-
 http.createServer((req, res) => {
     let filePath = req.url.substr(1);
     if(!filePath) filePath = 'index.html';
@@ -33,8 +31,12 @@ http.createServer((req, res) => {
 
 console.log(`RAGE Editor is listening on port ${config.port}`);
 
+if(!__rpcListeners['reditor:canPlayerUse']){
+    rpc.register('reditor:canPlayerUse', (_, { player }) => {
+        return (!Array.isArray(config.whitelistIPs) || !config.whitelistIPs.length || config.whitelistIPs.includes(player.ip));
+    });
+}
 rpc.register('reditor:getInfo', (_, { player }) => url.then(url => {
-    if(Array.isArray(config.whitelistIPs) && config.whitelistIPs.length && !config.whitelistIPs.includes(player.ip)) return;
     return {
         url: player.ip === '127.0.0.1' ? `http://localhost:${config.port}` : url,
         key: config.key

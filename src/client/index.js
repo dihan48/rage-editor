@@ -40,14 +40,31 @@ function onBindPress(){
             lastChatActivation.then(t => mp.gui.chat.activate(t));
             browser.active = false;
         }else{
-            mp.events.call('reditor:shown');
-            lastChatActivation = getChatStatus();
-            mp.gui.cursor.visible = true;
-            lastChatActivation.then(() => mp.gui.chat.activate(false));
-            browser.active = true;
-            focusEditor();
+            getUserAccess().then(access => {
+                if(access){
+                    rpc.callBrowser(browser, 'reditor:setAccess', access);
+                    mp.events.call('reditor:shown');
+                    lastChatActivation = getChatStatus();
+                    mp.gui.cursor.visible = true;
+                    lastChatActivation.then(() => mp.gui.chat.activate(false));
+                    browser.active = true;
+                    focusEditor();
+                }
+            });
         }
     }
+}
+
+function getUserAccess(){
+    return rpc.callServer('reditor:canPlayerUse').then(res => {
+        if(typeof res === 'object'){
+            return {
+                l: !!res.l,
+                s: !!res.s,
+                c: !!res.c
+            };
+        }else return !!res;
+    });
 }
 
 function focusEditor(){

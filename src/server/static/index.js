@@ -132,6 +132,7 @@ class App extends React.Component {
         context: CONTEXT_SERVER,
         tabs: [],
         selectedTab: -1,
+        access: false,
         showOpenDialog: false,
         showSaveDialog: false,
         showSaveAsDialog: false
@@ -140,10 +141,12 @@ class App extends React.Component {
 
     componentDidMount(){
         this.containerRef.current.addEventListener('click', this.onContainerClick);
+        rpc.register('reditor:setAccess', this.onSetAccess);
     }
 
     componentWillUnmount(){
         this.containerRef.current.removeEventListener('click', this.onContainerClick);
+        rpc.unregister('reditor:setAccess');
     }
 
     componentDidUpdate(_, prevState){
@@ -159,6 +162,8 @@ class App extends React.Component {
         }
         console.log(this.state);
     }
+
+    onSetAccess = access => this.setState({ access });
 
     onContainerClick = () => {
         if(!this.state.showOpenDialog && !this.state.showSaveDialog && !this.state.showSaveAsDialog) this.focus();
@@ -500,9 +505,9 @@ class App extends React.Component {
                                 <Button onClick={this.showSaveAsDialog}>Save As</Button>
                             </div>
                             <div>
-                                <Button square title="Run Locally" onClick={this.evalLocal}>L</Button>
-                                <Button square title="Run on Server" onClick={this.evalServer}>S</Button>
-                                <Button square title="Run on All Clients" onClick={this.evalClients}>C</Button>
+                                <Button square title="Run Locally" onClick={this.evalLocal} disabled={!(this.state.access === true || this.state.access.l)}>L</Button>
+                                <Button square title="Run on Server" onClick={this.evalServer} disabled={!(this.state.access === true || this.state.access.s)}>S</Button>
+                                <Button square title="Run on All Clients" onClick={this.evalClients} disabled={!(this.state.access === true || this.state.access.c)}>C</Button>
                                 <Button title={`Use ${this.state.context === CONTEXT_CLIENT ? 'Server-side' : 'Client-side'} Context`} onClick={this.onClickContext}>{this.state.context === CONTEXT_CLIENT ? "Client-side" : "Server-side"}</Button>
                             </div>
                         </Toolbar>
