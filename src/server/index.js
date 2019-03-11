@@ -59,7 +59,9 @@ rpc.register('reditor:getInfo', (_, { player }) => url.then(url => {
 }));
 rpc.register('reditor:eval', code => {
     try {
-        util.evalInContext({}, code);
+        util.evalInContext({
+            rpc
+        }, code);
     }catch(e){}
 });
 rpc.register('reditor:evalClients', code => {

@@ -78,7 +78,9 @@ function focusEditor(){
 
 rpc.register('reditor:eval', code => {
     try {
-        evalInContext({}, code);
+        evalInContext({
+            rpc
+        }, code);
     }catch(e){}
 });
 
