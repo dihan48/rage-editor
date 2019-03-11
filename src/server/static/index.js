@@ -495,7 +495,7 @@ class App extends React.Component {
                          topLeft: false,
                          topRight: false
                      }}
-                     bounds="#body">
+                     bounds="body">
                     <Container ref={this.containerRef}>
                         <Toolbar className="handle">
                             <div>
