@@ -1,12 +1,27 @@
+'use strict';
+
 const fs        = require('fs');
 const path      = require('path');
 const http      = require('http');
+const https     = require('https');
 const ngrok     = require('ngrok');
 const rpc       = require('rage-rpc');
 const config    = require('./config.json');
-const util      = require('./util.js');
+const util      = require('../shared/util.js');
 
-const url = config.useNgrok ? ngrok.connect(config.port) : util.getIpAddress().then(ip => `http://${ip}:${config.port}`);
+const url = config.useNgrok ? ngrok.connect(config.port) : getIpAddress().then(ip => `http://${ip}:${config.port}`);
+
+function getIpAddress(){
+    return new Promise((resolve, reject) => {
+        const req = https.get('https://api.ipify.org', res => {
+            if(res.statusCode < 200 || res.statusCode > 299) return reject(res.statusCode);
+            const body = [];
+            res.on('data', chunk => body.push(chunk));
+            res.on('end', () => resolve(body.join('')));
+        });
+        req.on('error', reject);
+    });
+}
 
 http.createServer((req, res) => {
     let filePath = req.url.substr(1);
@@ -31,7 +46,7 @@ http.createServer((req, res) => {
 
 console.log(`RAGE Editor is listening on port ${config.port}`);
 
-if(!__rpcListeners['reditor:canPlayerUse']){
+if(!global['__rpcListeners']['reditor:canPlayerUse']){
     rpc.register('reditor:canPlayerUse', (_, { player }) => {
         return (!Array.isArray(config.whitelistIPs) || !config.whitelistIPs.length || config.whitelistIPs.includes(player.ip));
     });
@@ -44,7 +59,7 @@ rpc.register('reditor:getInfo', (_, { player }) => url.then(url => {
 }));
 rpc.register('reditor:eval', code => {
     try {
-        eval(code);
+        util.evalInContext({}, code);
     }catch(e){}
 });
 rpc.register('reditor:evalClients', code => {

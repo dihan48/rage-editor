@@ -1,4 +1,7 @@
+'use strict';
+
 import * as rpc from 'rage-rpc';
+import { evalInContext } from '../shared/util.js';
 
 const STORAGE_KEY = 'reditorFiles';
 
@@ -75,7 +78,7 @@ function focusEditor(){
 
 rpc.register('reditor:eval', code => {
     try {
-        eval(code);
+        evalInContext({}, code);
     }catch(e){}
 });
 
